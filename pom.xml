@@ -15,15 +15,19 @@
 
   <build>
     <resources>
+      <!-- Uncomment to bundle source in the jar
       <resource>
         <directory>src/main/java</directory>
       </resource>
+      -->
+      <!-- Uncomment to bundle native libraries in the jar (NB: need to modify Makefile to move them to the right place
       <resource>
         <directory>src/main/resources</directory>
         <includes>
           <include>org/**</include>
         </includes>
       </resource>
+      -->
       <resource>
         <directory>src/main/resources</directory>
         <targetPath>META-INF/services</targetPath>
