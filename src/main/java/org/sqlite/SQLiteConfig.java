@@ -102,7 +102,15 @@ public class SQLiteConfig
         pragmaParams.remove(Pragma.LOAD_EXTENSION.pragmaName);
 
         Statement stat = conn.createStatement();
+
         try {
+            // To support WAL without SHM correctly, locking_mode must be the first pragma applied
+            String locking = pragmaTable.getProperty(Pragma.LOCKING_MODE.pragmaName);
+            if (locking != null) {
+                stat.execute(String.format("pragma %s=%s", Pragma.LOCKING_MODE.pragmaName, locking));
+                pragmaParams.remove(Pragma.LOCKING_MODE.pragmaName);
+            }
+
             for (Object each : pragmaTable.keySet()) {
                 String key = each.toString();
                 if (!pragmaParams.contains(key)) {
