@@ -1,0 +1,90 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.xerial</groupId>
+  <artifactId>sqlite-jdbc</artifactId>
+  <version>3.7.16</version>
+  <name>SQLite JDBC</name>
+  <description>SQLite JDBC library</description>
+
+  <parent>
+    <groupId>org.xerial</groupId>
+    <artifactId>xerial-project</artifactId>
+    <version>2.0.2</version>
+  </parent>
+
+  <build>
+    <resources>
+      <!-- Uncomment to bundle source in the jar
+      <resource>
+        <directory>src/main/java</directory>
+      </resource>
+      -->
+      <!-- Uncomment to bundle native libraries in the jar (NB: need to modify Makefile to move them to the right place
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>org/**</include>
+        </includes>
+      </resource>
+      -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <targetPath>META-INF/services</targetPath>
+        <includes>
+          <include>java.sql.Driver</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>${basedir}</directory>
+        <targetPath>META-INF/maven/${project.groupId}/${project.artifactId}</targetPath>
+        <includes>
+          <include>VERSION</include>
+          <include>LICENSE*</include>
+        </includes>
+      </resource>
+    </resources>
+    
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+		<version>2.0.2</version>
+        <configuration>
+          <compilerArgument>
+            -Xbootclasspath/p:${basedir}/lib/jdbc-api-1.4.jar
+          </compilerArgument>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+		<version>2.1</version>
+        <configuration>
+          <!--  do not run site-deploy goal, included in the default settings  -->
+          <goals>deploy</goals>
+          <connectionUrl>scm:hg:ssh://hg@bitbucket.org/huguesb/sqlite-jdbc</connectionUrl>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <scm>
+    <connection>scm:hg:https://bitbucket.org/huguesb/sqlite-jdbc</connection>
+    <developerConnection>scm:hg:ssh://hg@bitbucket.org/huguesb/sqlite-jdbc</developerConnection>
+    <url>https://bitbucket.org/huguesb/sqlite-jdbc</url>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.xerial.thirdparty</groupId>
+      <artifactId>jdbc-api</artifactId>
+      <version>1.4</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>
