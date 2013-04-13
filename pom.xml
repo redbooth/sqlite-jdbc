@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.7.2</version>
+  <version>3.7.15-SNAPSHOT</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
   <parent>
     <groupId>org.xerial</groupId>
     <artifactId>xerial-project</artifactId>
-    <version>1.1</version>
+    <version>2.0.2</version>
   </parent>
 
   <build>
@@ -21,13 +21,19 @@
       <resource>
         <directory>src/main/resources</directory>
         <includes>
-          <include>native/**</include>
           <include>org/**</include>
         </includes>
       </resource>
       <resource>
+        <directory>src/main/resources</directory>
+        <targetPath>META-INF/services</targetPath>
+        <includes>
+          <include>java.sql.Driver</include>
+        </includes>
+      </resource>
+      <resource>
         <directory>${basedir}</directory>
-        <targetPath>META-INF/maven/${groupId}/${artifactId}</targetPath>
+        <targetPath>META-INF/maven/${project.groupId}/${project.artifactId}</targetPath>
         <includes>
           <include>VERSION</include>
           <include>LICENSE*</include>
@@ -39,6 +45,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+		<version>2.0.2</version>
         <configuration>
           <compilerArgument>
             -Xbootclasspath/p:${basedir}/lib/jdbc-api-1.4.jar
@@ -49,38 +56,12 @@
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>unpack-dependency</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-              <excludes>META-INF,META-INF/**</excludes>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.xerial.thirdparty</groupId>
-                  <artifactId>nestedvm</artifactId>
-                  <version>1.0</version>
-                  <type>jar</type>
-                </artifactItem>
-              </artifactItems>
-              <overWrite>true</overWrite>
-              <outputDirectory>src/main/resources</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
         <artifactId>maven-release-plugin</artifactId>
+		<version>2.1</version>
         <configuration>
           <!--  do not run site-deploy goal, included in the default settings  -->
           <goals>deploy</goals>
-          <connectionUrl>scm:hg:https://sqlite.xerial.googlecode.com/hg/</connectionUrl>
+          <connectionUrl>scm:hg:ssh://hg@bitbucket.org/xerial/sqlite-jdbc</connectionUrl>
         </configuration>
       </plugin>
 
@@ -89,19 +70,12 @@
   </build>
 
   <scm>
-    <connection>scm:hg:https://sqlite.xerial.googlecode.com/hg/</connection>
-    <developerConnection>scm:hg:default</developerConnection>
-    <url>scm:hg:https://sqlite.xerial.googlecode.com/hg/</url>
+    <connection>scm:hg:https://bitbucket.org/xerial/sqlite-jdbc</connection>
+    <developerConnection>scm:hg:ssh://hg@bitbucket.org/xerial/sqlite-jdbc</developerConnection>
+    <url>https://bitbucket.org/xerial/sqlite-jdbc</url>
   </scm>
 
-
   <dependencies>
-    <dependency>
-      <groupId>org.xerial.thirdparty</groupId>
-      <artifactId>nestedvm</artifactId>
-      <version>1.0</version>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>org.xerial.thirdparty</groupId>
       <artifactId>jdbc-api</artifactId>

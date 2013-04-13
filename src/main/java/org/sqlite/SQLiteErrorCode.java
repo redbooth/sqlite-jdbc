@@ -28,7 +28,7 @@ package org.sqlite;
  * SQLite3 error code
  * 
  * @author leo
- * @see http://www.sqlite.org/c3ref/c_abort.html
+ * @see <a href="http://www.sqlite.org/c3ref/c_abort.html">http://www.sqlite.org/c3ref/c_abort.html</a>
  * 
  */
 public enum SQLiteErrorCode {
@@ -68,12 +68,21 @@ public enum SQLiteErrorCode {
     public final int code;
     public final String message;
 
+    /**
+     * Constructor that applies error code and message.
+     * @param code Error code.
+     * @param message Message for the error.
+     */
     private SQLiteErrorCode(int code, String message)
     {
         this.code = code;
         this.message = message;
     }
 
+    /**
+     * @param errorCode Error code.
+     * @return Error message.
+     */
     public static SQLiteErrorCode getErrorCode(int errorCode)
     {
         for (SQLiteErrorCode each : SQLiteErrorCode.values())
@@ -84,6 +93,9 @@ public enum SQLiteErrorCode {
         return UNKNOWN_ERROR;
     }
 
+    /**
+     * @see java.lang.Enum#toString()
+     */
     @Override
     public String toString()
     {

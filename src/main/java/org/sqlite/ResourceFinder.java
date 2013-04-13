@@ -83,16 +83,25 @@ public class ResourceFinder
         return classLoader.getResource(resourcePath);
     }
 
+    @SuppressWarnings("unused")
     private static String packagePath(Class< ? > referenceClass)
     {
         return packagePath(referenceClass.getPackage());
     }
 
+    /**
+     * @param basePackage Package object
+     * @return Package path String in the unix-like format.
+     */
     private static String packagePath(Package basePackage)
     {
         return packagePath(basePackage.getName());
     }
 
+    /**
+     * @param packageName Package name string
+     * @return Package path String in the unix-like format.
+     */
     private static String packagePath(String packageName)
     {
         String packageAsPath = packageName.replaceAll("\\.", "/");

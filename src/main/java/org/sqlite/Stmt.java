@@ -31,6 +31,8 @@ class Stmt extends Unused implements Statement, Codes
     final DB   db;
     final RS   rs;
 
+    private MetaData metadata;
+
     long       pointer;
     String     sql            = null;
 
@@ -44,16 +46,27 @@ class Stmt extends Unused implements Statement, Codes
         rs = new RS(this);
     }
 
+    /**
+     * @throws SQLException If the database is not opened.
+     */
     protected final void checkOpen() throws SQLException {
         if (pointer == 0)
             throw new SQLException("statement is not executing");
     }
 
+    /**
+     * @return True if the database is opened; false otherwise.
+     * @throws SQLException
+     */
     boolean isOpen() throws SQLException {
         return (pointer != 0);
     }
 
-    /** Calls sqlite3_step() and sets up results. Expects a clean stmt. */
+    /**
+     * Calls sqlite3_step() and sets up results. Expects a clean stmt.
+     * @return True if the ResultSet has at least one row; false otherwise. 
+     * @throws SQLException If the given SQL statement is null or no database is open.
+     */
     protected boolean exec() throws SQLException {
         if (sql == null)
             throw new SQLException("SQLiteJDBC internal error: sql==null");
@@ -71,6 +84,13 @@ class Stmt extends Unused implements Statement, Codes
         return db.column_count(pointer) != 0;
     }
 
+    /**
+     * Executes SQL statement and throws SQLExceptions if the given SQL
+     * statement is null or no database is open.
+     * @param sql SQL statement.
+     * @return True if the ResultSet has at least one row; false otherwise. 
+     * @throws SQLException If the given SQL statement is null or no database is open.
+     */
     protected boolean exec(String sql) throws SQLException {
         if (sql == null)
             throw new SQLException("SQLiteJDBC internal error: sql==null");
@@ -88,11 +108,13 @@ class Stmt extends Unused implements Statement, Codes
         return db.column_count(pointer) != 0;
     }
 
-    // PUBLIC INTERFACE /////////////////////////////////////////////
+    protected void internalClose() throws SQLException {
+        if (db.conn.isClosed())
+            throw DB.newSQLException(SQLITE_ERROR, "Connection is closed");
 
-    public void close() throws SQLException {
         if (pointer == 0)
             return;
+        
         rs.close();
         batch = null;
         batchPos = 0;
@@ -101,27 +123,47 @@ class Stmt extends Unused implements Statement, Codes
             db.throwex();
     }
 
+    // PUBLIC INTERFACE /////////////////////////////////////////////
+
+    /**
+     * @see java.sql.Statement#close()
+     */
+    public void close() throws SQLException {
+        if (metadata != null)
+            metadata.close();
+
+        internalClose();
+    }
+    /**
+     * @see java.lang.Object#finalize()
+     */
     @Override
     protected void finalize() throws SQLException {
         close();
     }
 
+    /**
+     * @see java.sql.Statement#execute(java.lang.String)
+     */
     public boolean execute(String sql) throws SQLException {
-        close();
+        internalClose();
         this.sql = sql;
 
         db.prepare(this);
         return exec();
     }
 
+    /**
+     * @see java.sql.Statement#executeQuery(java.lang.String)
+     */
     public ResultSet executeQuery(String sql) throws SQLException {
-        close();
+        internalClose();
         this.sql = sql;
 
         db.prepare(this);
         if (!exec()) {
-            close();
-            throw new SQLException("query does not return ResultSet");
+            internalClose();
+            throw new SQLException("query does not return ResultSet", "SQLITE_DONE", SQLITE_DONE);
         }
         return getResultSet();
     }
@@ -133,8 +175,11 @@ class Stmt extends Unused implements Statement, Codes
         }
     }
 
+    /**
+     * @see java.sql.Statement#executeUpdate(java.lang.String)
+     */
     public int executeUpdate(String sql) throws SQLException {
-        close();
+        internalClose();
         this.sql = sql;
 
         int changes = 0;
@@ -145,23 +190,25 @@ class Stmt extends Unused implements Statement, Codes
         }
         else {
             try {
-                //db.prepare(this);
-                //changes = db.executeUpdate(this, null);
+                changes = db.total_changes();
 
                 // directly invokes the exec API to support multiple SQL statements 
                 int statusCode = db._exec(sql);
                 if (statusCode != SQLITE_OK)
                     throw DB.newSQLException(statusCode, "");
 
-                changes = db.changes();
+                changes = db.total_changes() - changes;
             }
             finally {
-                close();
+                internalClose();
             }
         }
         return changes;
     }
 
+    /**
+     * @see java.sql.Statement#getResultSet()
+     */
     public ResultSet getResultSet() throws SQLException {
         checkOpen();
         if (rs.isOpen())
@@ -181,6 +228,7 @@ class Stmt extends Unused implements Statement, Codes
      * This function has a complex behaviour best understood by carefully
      * reading the JavaDoc for getMoreResults() and considering the test
      * StatementTest.execute().
+     * @see java.sql.Statement#getUpdateCount()
      */
     public int getUpdateCount() throws SQLException {
         if (pointer != 0 && !rs.isOpen() && !resultsWaiting && db.column_count(pointer) == 0)
@@ -188,8 +236,11 @@ class Stmt extends Unused implements Statement, Codes
         return -1;
     }
 
+    /**
+     * @see java.sql.Statement#addBatch(java.lang.String)
+     */
     public void addBatch(String sql) throws SQLException {
-        close();
+        internalClose();
         if (batch == null || batchPos + 1 >= batch.length) {
             Object[] nb = new Object[Math.max(10, batchPos * 2)];
             if (batch != null)
@@ -199,6 +250,9 @@ class Stmt extends Unused implements Statement, Codes
         batch[batchPos++] = sql;
     }
 
+    /**
+     * @see java.sql.Statement#clearBatch()
+     */
     public void clearBatch() throws SQLException {
         batchPos = 0;
         if (batch != null)
@@ -206,9 +260,12 @@ class Stmt extends Unused implements Statement, Codes
                 batch[i] = null;
     }
 
+    /**
+     * @see java.sql.Statement#executeBatch()
+     */
     public int[] executeBatch() throws SQLException {
         // TODO: optimize
-        close();
+        internalClose();
         if (batch == null || batchPos == 0)
             return new int[] {};
 
@@ -238,27 +295,47 @@ class Stmt extends Unused implements Statement, Codes
         return changes;
     }
 
+    /**
+     * @see java.sql.Statement#setCursorName(java.lang.String)
+     */
     public void setCursorName(String name) {}
 
+    /**
+     * @see java.sql.Statement#getWarnings()
+     */
     public SQLWarning getWarnings() throws SQLException {
         return null;
     }
 
+    /**
+     * @see java.sql.Statement#clearWarnings()
+     */
     public void clearWarnings() throws SQLException {}
 
+    /**
+     * @see java.sql.Statement#getConnection()
+     */
     public Connection getConnection() throws SQLException {
         return conn;
     }
 
+    /**
+     * @see java.sql.Statement#cancel()
+     */
     public void cancel() throws SQLException {
-        rs.checkOpen();
         db.interrupt();
     }
 
+    /**
+     * @see java.sql.Statement#getQueryTimeout()
+     */
     public int getQueryTimeout() throws SQLException {
         return conn.getTimeout();
     }
 
+    /**
+     * @see java.sql.Statement#setQueryTimeout(int)
+     */
     public void setQueryTimeout(int seconds) throws SQLException {
         if (seconds < 0)
             throw new SQLException("query timeout must be >= 0");
@@ -266,11 +343,17 @@ class Stmt extends Unused implements Statement, Codes
     }
 
     // TODO: write test
+    /**
+     * @see java.sql.Statement#getMaxRows()
+     */
     public int getMaxRows() throws SQLException {
         //checkOpen();
         return rs.maxRows;
     }
 
+    /**
+     * @see java.sql.Statement#setMaxRows(int)
+     */
     public void setMaxRows(int max) throws SQLException {
         //checkOpen();
         if (max < 0)
@@ -278,27 +361,45 @@ class Stmt extends Unused implements Statement, Codes
         rs.maxRows = max;
     }
 
+    /**
+     * @see java.sql.Statement#getMaxFieldSize()
+     */
     public int getMaxFieldSize() throws SQLException {
         return 0;
     }
 
+    /**
+     * @see java.sql.Statement#setMaxFieldSize(int)
+     */
     public void setMaxFieldSize(int max) throws SQLException {
         if (max < 0)
             throw new SQLException("max field size " + max + " cannot be negative");
     }
 
+    /**
+     * @see java.sql.Statement#getFetchSize()
+     */
     public int getFetchSize() throws SQLException {
         return rs.getFetchSize();
     }
 
+    /**
+     * @see java.sql.Statement#setFetchSize(int)
+     */
     public void setFetchSize(int r) throws SQLException {
         rs.setFetchSize(r);
     }
 
+    /**
+     * @see java.sql.Statement#getFetchDirection()
+     */
     public int getFetchDirection() throws SQLException {
         return rs.getFetchDirection();
     }
 
+    /**
+     * @see java.sql.Statement#setFetchDirection(int)
+     */
     public void setFetchDirection(int d) throws SQLException {
         rs.setFetchDirection(d);
     }
@@ -307,31 +408,60 @@ class Stmt extends Unused implements Statement, Codes
      * As SQLite's last_insert_rowid() function is DB-specific not statement
      * specific, this function introduces a race condition if the same
      * connection is used by two threads and both insert.
+     * @see java.sql.Statement#getGeneratedKeys()
      */
     public ResultSet getGeneratedKeys() throws SQLException {
-        return ((MetaData) conn.getMetaData()).getGeneratedKeys();
+        if (metadata == null)
+            metadata = (MetaData) conn.getMetaData();
+
+        return metadata.getGeneratedKeys();
     }
 
-    /** SQLite does not support multiple results from execute(). */
+    /**
+     * SQLite does not support multiple results from execute().
+     * @see java.sql.Statement#getMoreResults()
+     */
     public boolean getMoreResults() throws SQLException {
         return getMoreResults(0);
     }
 
+    /**
+     * @see java.sql.Statement#getMoreResults(int)
+     */
     public boolean getMoreResults(int c) throws SQLException {
         checkOpen();
-        close(); // as we never have another result, clean up pointer
+        internalClose(); // as we never have another result, clean up pointer
         return false;
     }
 
+    /**
+     * @see java.sql.Statement#getResultSetConcurrency()
+     */
     public int getResultSetConcurrency() throws SQLException {
         return ResultSet.CONCUR_READ_ONLY;
     }
 
+    /**
+     * @see java.sql.Statement#getResultSetHoldability()
+     */
     public int getResultSetHoldability() throws SQLException {
         return ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
+    /**
+     * @see java.sql.Statement#getResultSetType()
+     */
     public int getResultSetType() throws SQLException {
         return ResultSet.TYPE_FORWARD_ONLY;
     }
+
+    /**
+     * @see java.sql.Statement#setEscapeProcessing(boolean)
+     */
+    public void setEscapeProcessing(boolean enable) throws SQLException {
+        if(enable) {
+          throw unused();
+        }
+    }
+
 }

@@ -22,18 +22,18 @@ import java.net.*;
 import java.sql.*;
 import java.util.Map;
 
-/** Unused JDBC functions from Statement, PreparedStatement and ResultSet.  */
+/**
+ * Unused JDBC functions from Statement, PreparedStatement and ResultSet.
+ */
 abstract class Unused
 {
-    private SQLException unused() {
+    protected SQLException unused() {
         return new SQLException("not implemented by SQLite JDBC driver");
     }
 
 
     // Statement ////////////////////////////////////////////////////
 
-    public void setEscapeProcessing(boolean enable)
-        throws SQLException { throw unused(); }
     public boolean execute(String sql, int[] colinds)
         throws SQLException { throw unused(); }
     public boolean execute(String sql, String[] colnames)
@@ -52,19 +52,13 @@ abstract class Unused
 
     public void setArray(int i, Array x)
         throws SQLException { throw unused(); }
-    public void setAsciiStream(int parameterIndex, InputStream x, int length)
-        throws SQLException { throw unused(); }
-    public void setBigDecimal(int parameterIndex, BigDecimal x)
-        throws SQLException { throw unused(); }
-    public void setBinaryStream(int parameterIndex, InputStream x, int length)
-        throws SQLException { throw unused(); }
+//    public void setBigDecimal(int parameterIndex, BigDecimal x)
+//        throws SQLException { throw unused(); }
     public void setBlob(int i, Blob x)
         throws SQLException { throw unused(); }
     public void setClob(int i, Clob x)
         throws SQLException { throw unused(); }
     public void setRef(int i, Ref x)
-        throws SQLException { throw unused(); }
-    public void setUnicodeStream(int pos, InputStream x, int length)
         throws SQLException { throw unused(); }
     public void setURL(int pos, URL x)
         throws SQLException { throw unused(); }
@@ -80,12 +74,12 @@ abstract class Unused
         throws SQLException { throw unused(); }
     public InputStream getAsciiStream(String col)
         throws SQLException { throw unused(); }
-    public BigDecimal getBigDecimal(int col)
-        throws SQLException { throw unused(); }
+//    public BigDecimal getBigDecimal(int col)
+//        throws SQLException { throw unused(); }
     public BigDecimal getBigDecimal(int col, int s)
         throws SQLException { throw unused(); }
-    public BigDecimal getBigDecimal(String col)
-        throws SQLException { throw unused(); }
+//    public BigDecimal getBigDecimal(String col)
+//        throws SQLException { throw unused(); }
     public BigDecimal getBigDecimal(String col, int s)
         throws SQLException { throw unused(); }
     public InputStream getBinaryStream(int col)
@@ -100,8 +94,10 @@ abstract class Unused
         throws SQLException { throw unused(); }
     public Clob getClob(String col)
         throws SQLException { throw unused(); }
+    @SuppressWarnings("rawtypes")
     public Object getObject(int col, Map map)
         throws SQLException { throw unused(); }
+    @SuppressWarnings("rawtypes")
     public Object getObject(String col, Map map)
         throws SQLException { throw unused(); }
     public Ref getRef(int i)
