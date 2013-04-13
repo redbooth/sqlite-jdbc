@@ -25,69 +25,112 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class MetaData implements DatabaseMetaData
 {
     private Conn              conn;
-    private PreparedStatement getTables        = null, getTableTypes = null, getTypeInfo = null, getCatalogs = null,
-            getSchemas = null, getUDTs = null, getColumnsTblName = null, getSuperTypes = null, getSuperTables = null,
-            getTablePrivileges = null, getIndexInfo = null, getProcedures = null, getProcedureColumns = null,
-            getAttributes = null, getBestRowIdentifier = null, getVersionColumns = null, getColumnPrivileges = null;
+    private PreparedStatement
+            getTables             = null,   getTableTypes        = null,
+            getTypeInfo           = null,   getCatalogs          = null,
+            getSchemas            = null,   getUDTs              = null,
+            getColumnsTblName     = null,   getSuperTypes        = null,
+            getSuperTables        = null,   getTablePrivileges   = null,
+            getIndexInfo          = null,   getProcedures        = null,
+            getProcedureColumns   = null,   getAttributes        = null,
+            getBestRowIdentifier  = null,   getVersionColumns    = null,
+            getColumnPrivileges   = null;
 
-    /** Used by PrepStmt to save generating a new statement every call. */
+    /**
+     * Used by PrepStmt to save generating a new statement every call.
+     */
     private PreparedStatement getGeneratedKeys = null;
 
+    /**
+     * Constructor that applies the Connection object.
+     * @param conn Connection object.
+     */
     MetaData(Conn conn) {
         this.conn = conn;
     }
 
+    /**
+     * @throws SQLException
+     */
     void checkOpen() throws SQLException {
-        if (conn == null)
+        if (conn == null) {
             throw new SQLException("connection closed");
+        }
     }
 
+    /**
+     * @throws SQLException
+     */
     synchronized void close() throws SQLException {
-        if (conn == null)
+        if (conn == null) {
             return;
+        }
 
         try {
-            if (getTables != null)
+            if (getTables != null) {
                 getTables.close();
-            if (getTableTypes != null)
+            }
+            if (getTableTypes != null) {
                 getTableTypes.close();
-            if (getTypeInfo != null)
+            }
+            if (getTypeInfo != null) {
                 getTypeInfo.close();
-            if (getCatalogs != null)
+            }
+            if (getCatalogs != null) {
                 getCatalogs.close();
-            if (getSchemas != null)
+            }
+            if (getSchemas != null) {
                 getSchemas.close();
-            if (getUDTs != null)
+            }
+            if (getUDTs != null) {
                 getUDTs.close();
-            if (getColumnsTblName != null)
+            }
+            if (getColumnsTblName != null) {
                 getColumnsTblName.close();
-            if (getSuperTypes != null)
+            }
+            if (getSuperTypes != null) {
                 getSuperTypes.close();
-            if (getSuperTables != null)
+            }
+            if (getSuperTables != null) {
                 getSuperTables.close();
-            if (getTablePrivileges != null)
+            }
+            if (getTablePrivileges != null) {
                 getTablePrivileges.close();
-            if (getIndexInfo != null)
+            }
+            if (getIndexInfo != null) {
                 getIndexInfo.close();
-            if (getProcedures != null)
+            }
+            if (getProcedures != null) {
                 getProcedures.close();
-            if (getProcedureColumns != null)
+            }
+            if (getProcedureColumns != null) {
                 getProcedureColumns.close();
-            if (getAttributes != null)
+            }
+            if (getAttributes != null) {
                 getAttributes.close();
-            if (getBestRowIdentifier != null)
+            }
+            if (getBestRowIdentifier != null) {
                 getBestRowIdentifier.close();
-            if (getVersionColumns != null)
+            }
+            if (getVersionColumns != null) {
                 getVersionColumns.close();
-            if (getColumnPrivileges != null)
+            }
+            if (getColumnPrivileges != null) {
                 getColumnPrivileges.close();
-            if (getGeneratedKeys != null)
+            }
+            if (getGeneratedKeys != null) {
                 getGeneratedKeys.close();
+            }
 
             getTables = null;
             getTableTypes = null;
@@ -113,584 +156,1020 @@ class MetaData implements DatabaseMetaData
         }
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getConnection()
+     */
     public Connection getConnection() {
         return conn;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getDatabaseMajorVersion()
+     */
     public int getDatabaseMajorVersion() {
         return 3;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getDatabaseMinorVersion()
+     */
     public int getDatabaseMinorVersion() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getDriverMajorVersion()
+     */
     public int getDriverMajorVersion() {
         return 1;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getDriverMinorVersion()
+     */
     public int getDriverMinorVersion() {
         return 1;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getJDBCMajorVersion()
+     */
     public int getJDBCMajorVersion() {
         return 2;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getJDBCMinorVersion()
+     */
     public int getJDBCMinorVersion() {
         return 1;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getDefaultTransactionIsolation()
+     */
     public int getDefaultTransactionIsolation() {
         return Connection.TRANSACTION_SERIALIZABLE;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxBinaryLiteralLength()
+     */
     public int getMaxBinaryLiteralLength() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxCatalogNameLength()
+     */
     public int getMaxCatalogNameLength() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxCharLiteralLength()
+     */
     public int getMaxCharLiteralLength() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxColumnNameLength()
+     */
     public int getMaxColumnNameLength() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxColumnsInGroupBy()
+     */
     public int getMaxColumnsInGroupBy() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxColumnsInIndex()
+     */
     public int getMaxColumnsInIndex() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxColumnsInOrderBy()
+     */
     public int getMaxColumnsInOrderBy() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxColumnsInSelect()
+     */
     public int getMaxColumnsInSelect() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxColumnsInTable()
+     */
     public int getMaxColumnsInTable() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxConnections()
+     */
     public int getMaxConnections() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxCursorNameLength()
+     */
     public int getMaxCursorNameLength() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxIndexLength()
+     */
     public int getMaxIndexLength() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxProcedureNameLength()
+     */
     public int getMaxProcedureNameLength() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxRowSize()
+     */
     public int getMaxRowSize() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxSchemaNameLength()
+     */
     public int getMaxSchemaNameLength() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxStatementLength()
+     */
     public int getMaxStatementLength() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxStatements()
+     */
     public int getMaxStatements() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxTableNameLength()
+     */
     public int getMaxTableNameLength() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxTablesInSelect()
+     */
     public int getMaxTablesInSelect() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getMaxUserNameLength()
+     */
     public int getMaxUserNameLength() {
         return 0;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getResultSetHoldability()
+     */
     public int getResultSetHoldability() {
         return ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getSQLStateType()
+     */
     public int getSQLStateType() {
         return sqlStateSQL99;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getDatabaseProductName()
+     */
     public String getDatabaseProductName() {
         return "SQLite";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getDatabaseProductVersion()
+     */
     public String getDatabaseProductVersion() throws SQLException {
         return conn.libversion();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getDriverName()
+     */
     public String getDriverName() {
         return "SQLiteJDBC";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getDriverVersion()
+     */
     public String getDriverVersion() {
         return conn.getDriverVersion();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getExtraNameCharacters()
+     */
     public String getExtraNameCharacters() {
         return "";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getCatalogSeparator()
+     */
     public String getCatalogSeparator() {
         return ".";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getCatalogTerm()
+     */
     public String getCatalogTerm() {
         return "catalog";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getSchemaTerm()
+     */
     public String getSchemaTerm() {
         return "schema";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getProcedureTerm()
+     */
     public String getProcedureTerm() {
         return "not_implemented";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getSearchStringEscape()
+     */
     public String getSearchStringEscape() {
         return null;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getIdentifierQuoteString()
+     */
     public String getIdentifierQuoteString() {
         return " ";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getSQLKeywords()
+     */
     public String getSQLKeywords() {
         return "";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getNumericFunctions()
+     */
     public String getNumericFunctions() {
         return "";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getStringFunctions()
+     */
     public String getStringFunctions() {
         return "";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getSystemFunctions()
+     */
     public String getSystemFunctions() {
         return "";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getTimeDateFunctions()
+     */
     public String getTimeDateFunctions() {
         return "";
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getURL()
+     */
     public String getURL() {
         return conn.url();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getUserName()
+     */
     public String getUserName() {
         return null;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#allProceduresAreCallable()
+     */
     public boolean allProceduresAreCallable() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#allTablesAreSelectable()
+     */
     public boolean allTablesAreSelectable() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#dataDefinitionCausesTransactionCommit()
+     */
     public boolean dataDefinitionCausesTransactionCommit() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#dataDefinitionIgnoredInTransactions()
+     */
     public boolean dataDefinitionIgnoredInTransactions() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#doesMaxRowSizeIncludeBlobs()
+     */
     public boolean doesMaxRowSizeIncludeBlobs() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#deletesAreDetected(int)
+     */
     public boolean deletesAreDetected(int type) {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#insertsAreDetected(int)
+     */
     public boolean insertsAreDetected(int type) {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#isCatalogAtStart()
+     */
     public boolean isCatalogAtStart() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#locatorsUpdateCopy()
+     */
     public boolean locatorsUpdateCopy() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#nullPlusNonNullIsNull()
+     */
     public boolean nullPlusNonNullIsNull() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#nullsAreSortedAtEnd()
+     */
     public boolean nullsAreSortedAtEnd() {
         return !nullsAreSortedAtStart();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#nullsAreSortedAtStart()
+     */
     public boolean nullsAreSortedAtStart() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#nullsAreSortedHigh()
+     */
     public boolean nullsAreSortedHigh() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#nullsAreSortedLow()
+     */
     public boolean nullsAreSortedLow() {
         return !nullsAreSortedHigh();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#othersDeletesAreVisible(int)
+     */
     public boolean othersDeletesAreVisible(int type) {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#othersInsertsAreVisible(int)
+     */
     public boolean othersInsertsAreVisible(int type) {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#othersUpdatesAreVisible(int)
+     */
     public boolean othersUpdatesAreVisible(int type) {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#ownDeletesAreVisible(int)
+     */
     public boolean ownDeletesAreVisible(int type) {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#ownInsertsAreVisible(int)
+     */
     public boolean ownInsertsAreVisible(int type) {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#ownUpdatesAreVisible(int)
+     */
     public boolean ownUpdatesAreVisible(int type) {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#storesLowerCaseIdentifiers()
+     */
     public boolean storesLowerCaseIdentifiers() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#storesLowerCaseQuotedIdentifiers()
+     */
     public boolean storesLowerCaseQuotedIdentifiers() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#storesMixedCaseIdentifiers()
+     */
     public boolean storesMixedCaseIdentifiers() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#storesMixedCaseQuotedIdentifiers()
+     */
     public boolean storesMixedCaseQuotedIdentifiers() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#storesUpperCaseIdentifiers()
+     */
     public boolean storesUpperCaseIdentifiers() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#storesUpperCaseQuotedIdentifiers()
+     */
     public boolean storesUpperCaseQuotedIdentifiers() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsAlterTableWithAddColumn()
+     */
     public boolean supportsAlterTableWithAddColumn() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsAlterTableWithDropColumn()
+     */
     public boolean supportsAlterTableWithDropColumn() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsANSI92EntryLevelSQL()
+     */
     public boolean supportsANSI92EntryLevelSQL() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsANSI92FullSQL()
+     */
     public boolean supportsANSI92FullSQL() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsANSI92IntermediateSQL()
+     */
     public boolean supportsANSI92IntermediateSQL() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsBatchUpdates()
+     */
     public boolean supportsBatchUpdates() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsCatalogsInDataManipulation()
+     */
     public boolean supportsCatalogsInDataManipulation() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsCatalogsInIndexDefinitions()
+     */
     public boolean supportsCatalogsInIndexDefinitions() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsCatalogsInPrivilegeDefinitions()
+     */
     public boolean supportsCatalogsInPrivilegeDefinitions() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsCatalogsInProcedureCalls()
+     */
     public boolean supportsCatalogsInProcedureCalls() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsCatalogsInTableDefinitions()
+     */
     public boolean supportsCatalogsInTableDefinitions() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsColumnAliasing()
+     */
     public boolean supportsColumnAliasing() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsConvert()
+     */
     public boolean supportsConvert() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsConvert(int, int)
+     */
     public boolean supportsConvert(int fromType, int toType) {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsCorrelatedSubqueries()
+     */
     public boolean supportsCorrelatedSubqueries() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsDataDefinitionAndDataManipulationTransactions()
+     */
     public boolean supportsDataDefinitionAndDataManipulationTransactions() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsDataManipulationTransactionsOnly()
+     */
     public boolean supportsDataManipulationTransactionsOnly() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsDifferentTableCorrelationNames()
+     */
     public boolean supportsDifferentTableCorrelationNames() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsExpressionsInOrderBy()
+     */
     public boolean supportsExpressionsInOrderBy() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsMinimumSQLGrammar()
+     */
     public boolean supportsMinimumSQLGrammar() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsCoreSQLGrammar()
+     */
     public boolean supportsCoreSQLGrammar() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsExtendedSQLGrammar()
+     */
     public boolean supportsExtendedSQLGrammar() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsLimitedOuterJoins()
+     */
     public boolean supportsLimitedOuterJoins() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsFullOuterJoins()
+     */
     public boolean supportsFullOuterJoins() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
+     */
     public boolean supportsGetGeneratedKeys() {
-        return false;
+        return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsGroupBy()
+     */
     public boolean supportsGroupBy() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsGroupByBeyondSelect()
+     */
     public boolean supportsGroupByBeyondSelect() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsGroupByUnrelated()
+     */
     public boolean supportsGroupByUnrelated() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsIntegrityEnhancementFacility()
+     */
     public boolean supportsIntegrityEnhancementFacility() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsLikeEscapeClause()
+     */
     public boolean supportsLikeEscapeClause() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsMixedCaseIdentifiers()
+     */
     public boolean supportsMixedCaseIdentifiers() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsMixedCaseQuotedIdentifiers()
+     */
     public boolean supportsMixedCaseQuotedIdentifiers() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsMultipleOpenResults()
+     */
     public boolean supportsMultipleOpenResults() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsMultipleResultSets()
+     */
     public boolean supportsMultipleResultSets() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsMultipleTransactions()
+     */
     public boolean supportsMultipleTransactions() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsNamedParameters()
+     */
     public boolean supportsNamedParameters() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsNonNullableColumns()
+     */
     public boolean supportsNonNullableColumns() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsOpenCursorsAcrossCommit()
+     */
     public boolean supportsOpenCursorsAcrossCommit() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsOpenCursorsAcrossRollback()
+     */
     public boolean supportsOpenCursorsAcrossRollback() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsOpenStatementsAcrossCommit()
+     */
     public boolean supportsOpenStatementsAcrossCommit() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsOpenStatementsAcrossRollback()
+     */
     public boolean supportsOpenStatementsAcrossRollback() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsOrderByUnrelated()
+     */
     public boolean supportsOrderByUnrelated() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsOuterJoins()
+     */
     public boolean supportsOuterJoins() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsPositionedDelete()
+     */
     public boolean supportsPositionedDelete() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsPositionedUpdate()
+     */
     public boolean supportsPositionedUpdate() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsResultSetConcurrency(int, int)
+     */
     public boolean supportsResultSetConcurrency(int t, int c) {
         return t == ResultSet.TYPE_FORWARD_ONLY && c == ResultSet.CONCUR_READ_ONLY;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsResultSetHoldability(int)
+     */
     public boolean supportsResultSetHoldability(int h) {
         return h == ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsResultSetType(int)
+     */
     public boolean supportsResultSetType(int t) {
         return t == ResultSet.TYPE_FORWARD_ONLY;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsSavepoints()
+     */
     public boolean supportsSavepoints() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsSchemasInDataManipulation()
+     */
     public boolean supportsSchemasInDataManipulation() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsSchemasInIndexDefinitions()
+     */
     public boolean supportsSchemasInIndexDefinitions() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsSchemasInPrivilegeDefinitions()
+     */
     public boolean supportsSchemasInPrivilegeDefinitions() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsSchemasInProcedureCalls()
+     */
     public boolean supportsSchemasInProcedureCalls() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsSchemasInTableDefinitions()
+     */
     public boolean supportsSchemasInTableDefinitions() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsSelectForUpdate()
+     */
     public boolean supportsSelectForUpdate() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsStatementPooling()
+     */
     public boolean supportsStatementPooling() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsStoredProcedures()
+     */
     public boolean supportsStoredProcedures() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsSubqueriesInComparisons()
+     */
     public boolean supportsSubqueriesInComparisons() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsSubqueriesInExists()
+     */
     public boolean supportsSubqueriesInExists() {
         return true;
     } // TODO: check
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsSubqueriesInIns()
+     */
     public boolean supportsSubqueriesInIns() {
         return true;
     } // TODO: check
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsSubqueriesInQuantifieds()
+     */
     public boolean supportsSubqueriesInQuantifieds() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsTableCorrelationNames()
+     */
     public boolean supportsTableCorrelationNames() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsTransactionIsolationLevel(int)
+     */
     public boolean supportsTransactionIsolationLevel(int level) {
         return level == Connection.TRANSACTION_SERIALIZABLE;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsTransactions()
+     */
     public boolean supportsTransactions() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsUnion()
+     */
     public boolean supportsUnion() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#supportsUnionAll()
+     */
     public boolean supportsUnionAll() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#updatesAreDetected(int)
+     */
     public boolean updatesAreDetected(int type) {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#usesLocalFilePerTable()
+     */
     public boolean usesLocalFilePerTable() {
         return false;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#usesLocalFiles()
+     */
     public boolean usesLocalFiles() {
         return true;
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#isReadOnly()
+     */
     public boolean isReadOnly() throws SQLException {
         return conn.isReadOnly();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getAttributes(java.lang.String, java.lang.String,
+     *      java.lang.String, java.lang.String)
+     */
     public ResultSet getAttributes(String c, String s, String t, String a) throws SQLException {
-        if (getAttributes == null)
+        if (getAttributes == null) {
             getAttributes = conn.prepareStatement("select " + "null as TYPE_CAT, " + "null as TYPE_SCHEM, "
                     + "null as TYPE_NAME, " + "null as ATTR_NAME, " + "null as DATA_TYPE, "
                     + "null as ATTR_TYPE_NAME, " + "null as ATTR_SIZE, " + "null as DECIMAL_DIGITS, "
@@ -698,25 +1177,40 @@ class MetaData implements DatabaseMetaData
                     + "null as SQL_DATA_TYPE, " + "null as SQL_DATETIME_SUB, " + "null as CHAR_OCTET_LENGTH, "
                     + "null as ORDINAL_POSITION, " + "null as IS_NULLABLE, " + "null as SCOPE_CATALOG, "
                     + "null as SCOPE_SCHEMA, " + "null as SCOPE_TABLE, " + "null as SOURCE_DATA_TYPE limit 0;");
+        }
         return getAttributes.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getBestRowIdentifier(java.lang.String, java.lang.String,
+     *      java.lang.String, int, boolean)
+     */
     public ResultSet getBestRowIdentifier(String c, String s, String t, int scope, boolean n) throws SQLException {
-        if (getBestRowIdentifier == null)
+        if (getBestRowIdentifier == null) {
             getBestRowIdentifier = conn.prepareStatement("select " + "null as SCOPE, " + "null as COLUMN_NAME, "
                     + "null as DATA_TYPE, " + "null as TYPE_NAME, " + "null as COLUMN_SIZE, "
                     + "null as BUFFER_LENGTH, " + "null as DECIMAL_DIGITS, " + "null as PSEUDO_COLUMN limit 0;");
+        }
         return getBestRowIdentifier.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getColumnPrivileges(java.lang.String, java.lang.String,
+     *      java.lang.String, java.lang.String)
+     */
     public ResultSet getColumnPrivileges(String c, String s, String t, String colPat) throws SQLException {
-        if (getColumnPrivileges == null)
+        if (getColumnPrivileges == null) {
             getColumnPrivileges = conn.prepareStatement("select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, "
                     + "null as TABLE_NAME, " + "null as COLUMN_NAME, " + "null as GRANTOR, " + "null as GRANTEE, "
                     + "null as PRIVILEGE, " + "null as IS_GRANTABLE limit 0;");
+        }
         return getColumnPrivileges.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String,
+     *      java.lang.String, java.lang.String)
+     */
     public ResultSet getColumns(String c, String s, String tbl, String colPat) throws SQLException {
         Statement stat = conn.createStatement();
         ResultSet rs;
@@ -724,23 +1218,25 @@ class MetaData implements DatabaseMetaData
 
         checkOpen();
 
-        if (getColumnsTblName == null)
+        if (getColumnsTblName == null) {
             getColumnsTblName = conn.prepareStatement("select tbl_name from sqlite_master where tbl_name like ?;");
+        }
 
         // determine exact table name
         getColumnsTblName.setString(1, tbl);
         rs = getColumnsTblName.executeQuery();
-        if (!rs.next())
+        if (!rs.next()) {
             return rs;
+        }
         tbl = rs.getString(1);
         rs.close();
 
         sql = "select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, " + "'" + escape(tbl) + "' as TABLE_NAME, "
                 + "cn as COLUMN_NAME, " + "ct as DATA_TYPE, " + "tn as TYPE_NAME, " + "2000000000 as COLUMN_SIZE, "
                 + "2000000000 as BUFFER_LENGTH, " + "10   as DECIMAL_DIGITS, " + "10   as NUM_PREC_RADIX, "
-                + "colnullable as NULLABLE, " + "null as REMARKS, " + "null as COLUMN_DEF, "
+                + "colnullable as NULLABLE, " + "null as REMARKS, " + "colDefault as COLUMN_DEF, "
                 + "0    as SQL_DATA_TYPE, " + "0    as SQL_DATETIME_SUB, " + "2000000000 as CHAR_OCTET_LENGTH, "
-                + "ordpos as ORDINAL_POSITION, " + "(case colnullable when 0 then 'N' when 1 then 'Y' else '' end)"
+                + "ordpos as ORDINAL_POSITION, " + "(case colnullable when 0 then 'NO' when 1 then 'YES' else '' end)"
                 + "    as IS_NULLABLE, " + "null as SCOPE_CATLOG, " + "null as SCOPE_SCHEMA, "
                 + "null as SCOPE_TABLE, " + "null as SOURCE_DATA_TYPE from (";
 
@@ -754,44 +1250,80 @@ class MetaData implements DatabaseMetaData
             String colName = rs.getString(2);
             String colType = rs.getString(3);
             String colNotNull = rs.getString(4);
+            String colDefault = rs.getString(5);
 
             int colNullable = 2;
-            if (colNotNull != null)
+            if (colNotNull != null) {
                 colNullable = colNotNull.equals("0") ? 1 : 0;
-            if (colFound)
+            }
+            if (colFound) {
                 sql += " union all ";
+            }
             colFound = true;
 
+            //            colType = colType == null ? "TEXT" : colType.toUpperCase();
+            //            int colJavaType = -1;
+            //            if (colType.equals("INT") || colType.equals("INTEGER"))
+            //                colJavaType = Types.INTEGER;
+            //            else if (colType.equals("TEXT"))
+            //                colJavaType = Types.VARCHAR;
+            //            else if (colType.equals("FLOAT"))
+            //                colJavaType = Types.FLOAT;
+            //            else
+            //                colJavaType = Types.VARCHAR;
+
+            /*
+             * improved column types
+             * ref http://www.sqlite.org/datatype3.html - 2.1 Determination Of Column
+            Affinity
+             * plus some degree of artistic-license applied
+             */
             colType = colType == null ? "TEXT" : colType.toUpperCase();
             int colJavaType = -1;
-            if (colType.equals("INT") || colType.equals("INTEGER"))
+            // rule #1 + boolean
+            if (colType.matches(".*(INT|BOOL).*")) {
                 colJavaType = Types.INTEGER;
-            else if (colType.equals("TEXT"))
+            }
+            else if (colType.matches(".*(CHAR|CLOB|TEXT|BLOB).*")) {
                 colJavaType = Types.VARCHAR;
-            else if (colType.equals("FLOAT"))
+            }
+            else if (colType.matches(".*(REAL|FLOA|DOUB|DEC|NUM).*")) {
                 colJavaType = Types.FLOAT;
-            else
+            }
+            else {
+                // catch-all
                 colJavaType = Types.VARCHAR;
+            }
 
-            sql += "select " + i + " as ordpos, " + colNullable + " as colnullable, '" + colJavaType + "' as ct, '"
-                    + escape(colName) + "' as cn, '" + escape(colType) + "' as tn";
+            sql += "select " + i + " as ordpos, "
+                    + colNullable + " as colnullable, '"
+                    + colJavaType + "' as ct, '"
+                    + escape(colName) + "' as cn, '"
+                    + escape(colType) + "' as tn, "
+                    + quote(colDefault == null ? null : escape(colDefault)) + " as colDefault";
 
-            if (colPat != null)
+            if (colPat != null) {
                 sql += " where upper(cn) like upper('" + escape(colPat) + "')";
+            }
         }
-        sql += colFound ? ");" : "select null as ordpos, null as colnullable, " + "null as cn, null as tn) limit 0;";
+        sql += colFound ? ");" : "select null as ordpos, null as colnullable, null as cn, null as tn, null as colDefault) limit 0;";
         rs.close();
 
         return stat.executeQuery(sql);
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getCrossReference(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     */
     public ResultSet getCrossReference(String pc, String ps, String pt, String fc, String fs, String ft)
             throws SQLException {
 
-        if (pt == null)
+        if (pt == null) {
             return getExportedKeys(fc, fs, ft);
-        if (ft == null)
+        }
+        if (ft == null) {
             return getImportedKeys(pc, ps, pt);
+        }
 
         StringBuilder query = new StringBuilder();
         query.append(String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, %s as PKTABLE_NAME, ", quote(pc),
@@ -806,153 +1338,220 @@ class MetaData implements DatabaseMetaData
         return conn.createStatement().executeQuery(query.toString());
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getSchemas()
+     */
     public ResultSet getSchemas() throws SQLException {
-        if (getSchemas == null)
+        if (getSchemas == null) {
             getSchemas = conn.prepareStatement("select " + "null as TABLE_SCHEM, " + "null as TABLE_CATALOG "
                     + "limit 0;");
+        }
         getSchemas.clearParameters();
         return getSchemas.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getCatalogs()
+     */
     public ResultSet getCatalogs() throws SQLException {
-        if (getCatalogs == null)
+        if (getCatalogs == null) {
             getCatalogs = conn.prepareStatement("select null as TABLE_CAT limit 0;");
+        }
         getCatalogs.clearParameters();
         return getCatalogs.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getPrimaryKeys(java.lang.String, java.lang.String,
+     *      java.lang.String)
+     */
     public ResultSet getPrimaryKeys(String c, String s, String table) throws SQLException {
-        String sql;
-        ResultSet rs;
+        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table);
+        String[] columns = pkFinder.getColumns();
+
         Statement stat = conn.createStatement();
+        StringBuilder sql = new StringBuilder(512);
+        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '")
+           .append(escape(table))
+           .append("' as TABLE_NAME, cn as COLUMN_NAME, ks as KEY_SEQ, pk as PK_NAME from (");
 
-        rs = stat.executeQuery("pragma table_info('" + escape(table) + "');");
-
-        sql = "select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, " + "'" + escape(table) + "' as TABLE_NAME, "
-                + "cn as COLUMN_NAME, " + "0 as KEY_SEQ, " + "null as PK_NAME from (";
-
-        int i;
-        for (i = 0; rs.next(); i++) {
-            String colName = rs.getString(2);
-
-            if (!rs.getBoolean(6)) {
-                i--;
-                continue;
-            }
-            if (i > 0)
-                sql += " union all ";
-
-            sql += "select '" + escape(colName) + "' as cn";
+        if (columns == null) {
+            sql.append("select null as cn, null as pk, 0 as ks) order by cn limit 0;");
+            return stat.executeQuery(sql.toString());
         }
-        sql += i == 0 ? "select null as cn) limit 0;" : ");";
-        rs.close();
 
-        return stat.executeQuery(sql);
+        String pkName = pkFinder.getName();
+
+        for (int i = 0; i < columns.length; i++) {
+            if (i > 0) sql.append(" union ");
+            sql.append("select ").append(pkName).append(" as pk, '")
+               .append(escape(columns[i].trim())).append("' as cn, ")
+               .append(i).append(" as ks");
+        }
+
+        return stat.executeQuery(sql.append(") order by cn;").toString());
     }
 
+    /**
+     * Adds SQL string quotes to the given string.
+     * @param tableName The string to quote.
+     * @return The quoted string.
+     */
     private static String quote(String tableName) {
-        if (tableName == null)
+        if (tableName == null) {
             return "null";
-        else
+        }
+        else {
             return String.format("'%s'", tableName);
+        }
     }
 
+    private final static Map<String, Integer> RULE_MAP = new HashMap<String, Integer>();
+
+    static {
+        RULE_MAP.put("NO ACTION", importedKeyNoAction);
+        RULE_MAP.put("CASCADE", importedKeyCascade);
+        RULE_MAP.put("RESTRICT", importedKeyRestrict);
+        RULE_MAP.put("SET NULL", importedKeySetNull);
+        RULE_MAP.put("SET DEFAULT", importedKeySetDefault);
+    }
+
+    /**
+     * Pattern used to extract a named primary key.
+     */
+     protected final static Pattern FK_NAMED_PATTERN =
+         Pattern.compile(".* constraint +(.*?) +foreign +key *\\((.*?)\\).*", Pattern.CASE_INSENSITIVE);
+
+     /**
+     * @see java.sql.DatabaseMetaData#getExportedKeys(java.lang.String, java.lang.String,
+     *      java.lang.String)
+     */
     public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
+        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table);
+        String[] pkColumns = pkFinder.getColumns();
+        Stmt stat = (Stmt)conn.createStatement();
 
-        StringBuilder exportedKeysQuery = new StringBuilder();
-        exportedKeysQuery.append(String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, %s as PKTABLE_NAME, ",
-                quote(catalog), quote(schema), quote(table))
-                + String.format("pcn as PKCOLUMN_NAME, %s as FKTABLE_CAT, %s as FKTABLE_SCHEM, ", quote(catalog),
-                        quote(schema))
-                + "fkn as FKTABLE_NAME, fcn as FKCOLUMN_NAME, "
-                + "ks as KEY_SEQ, "
-                + "ur as UPDATE_RULE, "
-                + "dr as DELETE_RULE, "
-                + "'' as FK_NAME, "
-                + "'' as PK_NAME, "
-                + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY from (");
+        catalog = (catalog != null) ? quote(catalog) : null;
+        schema = (schema != null) ? quote(schema) : null;
 
-        // retrieve table list
-        String tableListQuery = String.format("select name from sqlite_master where type = 'table'");
-        Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery(tableListQuery);
-        ArrayList<String> tableList = new ArrayList<String>();
-        while (rs.next())
-            tableList.add(rs.getString(1));
-        rs.close();
+        StringBuilder exportedKeysQuery = new StringBuilder(512);
 
-        // find imported keys for each table
         int count = 0;
-        for (String targetTable : tableList) {
-            String foreignKeyQuery = String.format("pragma foreign_key_list('%s');", escape(targetTable));
+        if (pkColumns != null) {
+            // retrieve table list
+            ResultSet rs = stat.executeQuery("select name from sqlite_master where type = 'table'");
+            ArrayList<String> tableList = new ArrayList<String>();
+            while (rs.next()) {
+                tableList.add(rs.getString(1));
+            }
+            rs.close();
+    
+            ResultSet fk = null;
+            String target = table.toLowerCase();
+            // find imported keys for each table
+            for (String tbl : tableList) {
+                try {
+                    fk = stat.executeQuery("pragma foreign_key_list('" + escape(tbl) + "')");
+                } catch (SQLException e) {
+                    if (e.getErrorCode() == Codes.SQLITE_DONE) 
+                        continue; // expected if table has no foreign keys
 
-            try {
-                ResultSet fk = stat.executeQuery(foreignKeyQuery);
-                for (; fk.next();) {
-                    int keySeq = fk.getInt(2) + 1;
-                    String PKTabName = fk.getString(3);
-                    String FKColName = fk.getString(4);
-                    String PKColName = fk.getString(5);
-                    String updateRule = fk.getString(6);
-                    String deleteRule = fk.getString(7);
-
-                    if (PKTabName == null || !PKTabName.equals(table))
-                        continue;
-
-                    if (count > 0)
-                        exportedKeysQuery.append(" union all ");
-
-                    exportedKeysQuery.append("select " + Integer.toString(keySeq) + " as ks," + "'"
-                            + escape(targetTable) + "' as fkn," + "'" + escape(FKColName) + "' as fcn," + "'"
-                            + escape(PKColName) + "' as pcn," + String.format("case '%s' ", escape(updateRule))
-                            + String.format("when 'NO ACTION' then %d ", importedKeyNoAction)
-                            + String.format("when 'CASCADE' then %d ", importedKeyCascade)
-                            + String.format("when 'RESTRICT' then %d  ", importedKeyRestrict)
-                            + String.format("when 'SET NULL' then %d  ", importedKeySetNull)
-                            + String.format("when 'SET DEFAULT' then %d  ", importedKeySetDefault) + "end as ur,"
-                            + String.format("case '%s' ", escape(deleteRule))
-                            + String.format("when 'NO ACTION' then %d ", importedKeyNoAction)
-                            + String.format("when 'CASCADE' then %d ", importedKeyCascade)
-                            + String.format("when 'RESTRICT' then %d  ", importedKeyRestrict)
-                            + String.format("when 'SET NULL' then %d  ", importedKeySetNull)
-                            + String.format("when 'SET DEFAULT' then %d  ", importedKeySetDefault) + "end as dr");
-
-                    count++;
+                    throw e;
                 }
 
-                exportedKeysQuery.append(");");
-                fk.close();
-            }
-            catch (SQLException e) {
-                // continue
+                Stmt stat2 = null;
+                try {
+                    stat2 = (Stmt)conn.createStatement();
+                    while(fk.next()) {
+                        int keySeq = fk.getInt(2) + 1;
+                        String PKTabName = fk.getString(3).toLowerCase();
+
+                        if (PKTabName == null || !PKTabName.equals(target)) {
+                            continue;
+                        }
+
+                        String PKColName = fk.getString(5);
+                        PKColName = (PKColName == null) ? pkColumns[0] : PKColName.toLowerCase();
+
+                        exportedKeysQuery
+                            .append(count > 0 ? " union all select " : "select ")
+                            .append(Integer.toString(keySeq)).append(" as ks, lower('")
+                            .append(escape(tbl)).append("') as fkt, lower('")
+                            .append(escape(fk.getString(4))).append("') as fcn, '")
+                            .append(escape(PKColName)).append("' as pcn, ")
+                            .append(RULE_MAP.get(fk.getString(6))).append(" as ur, ")
+                            .append(RULE_MAP.get(fk.getString(7))).append(" as dr, ");
+
+                        String fkName = "''";
+                        rs = stat2.executeQuery("select sql from sqlite_master where" +
+                            " lower(name) = lower('" + escape(tbl) + "')");
+                        if (rs.next())
+                        {
+                            Matcher matcher = FK_NAMED_PATTERN.matcher(rs.getString(1));
+                            if (matcher.find()){
+                                fkName = '\'' + escape(matcher.group(1).toLowerCase()) + '\'';
+                            }
+                        }
+                        rs.close();
+
+                        exportedKeysQuery.append(fkName).append(" as fkn");
+                        count++;
+                    }
+                }
+                finally {
+                    try{
+                        if (rs != null) rs.close();
+                    }catch(SQLException e) {}
+                    try{
+                        if (stat2 != null) stat2.close();
+                    }catch(SQLException e) {}
+                    try{
+                        if (fk != null) fk.close();
+                    }catch(SQLException e) {}
+                }
             }
         }
 
-        String sql = (count > 0) ? exportedKeysQuery.toString() : (String.format(
-                "select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, %s as PKTABLE_NAME, ", quote(catalog), quote(schema),
-                quote(table))
-                + "'' as PKCOLUMN_NAME, "
-                + String.format("%s as FKTABLE_CAT, %s as FKTABLE_SCHEM, ", quote(catalog), quote(schema))
-                + "'' as FKTABLE_NAME, "
-                + "'' as FKCOLUMN_NAME, "
-                + "-1 as KEY_SEQ, "
-                + "3 as UPDATE_RULE, "
-                + "3 as DELETE_RULE, " + "'' as FK_NAME, " + "'' as PK_NAME, " + "5 as DEFERRABILITY limit 0;");
-        return stat.executeQuery(sql);
+        boolean exist = (count > 0);
+        StringBuilder sql = new StringBuilder(512);
+        sql.append("select ")
+            .append(catalog).append(" as PKTABLE_CAT, ")
+            .append(schema).append(" as PKTABLE_SCHEM, ")
+            .append(quote(table)).append(" as PKTABLE_NAME, ")
+            .append(exist ? "pcn" : "''").append(" as PKCOLUMN_NAME, ")
+            .append(catalog).append(" as FKTABLE_CAT, ")
+            .append(schema).append(" as FKTABLE_SCHEM, ")
+            .append(exist ? "fkt" : "''").append(" as FKTABLE_NAME, ")
+            .append(exist ? "fcn" : "''").append(" as FKCOLUMN_NAME, ")
+            .append(exist ? "ks" : "-1").append(" as KEY_SEQ, ")
+            .append(exist ? "ur" : "3").append(" as UPDATE_RULE, ")
+            .append(exist ? "dr" : "3").append(" as DELETE_RULE, ")
+            .append(exist ? "fkn" : "''").append(" as FK_NAME, ")
+            .append(pkFinder.getName() != null ? pkFinder.getName() : "''").append(" as PK_NAME, ")
+            .append(Integer.toString(importedKeyInitiallyDeferred)) // FIXME: Check for pragma foreign_keys = true ?
+            .append(" as DEFERRABILITY ")
+            .append(exist ? "from (" : "limit 0");
+       if (exist)
+           sql.append(exportedKeysQuery).append(") order by fkt");
+
+        return stat.executeQuery(sql.toString()); //FIXME: close stat
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getImportedKeys(java.lang.String, java.lang.String,
+     *      java.lang.String)
+     */
     public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
         String sql;
         ResultSet rs = null;
         Statement stat = conn.createStatement();
 
         sql = String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, ", quote(catalog), quote(schema))
-                + String
-                        .format(
-                                "ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, %s as FKTABLE_CAT, %s as FKTABLE_SCHEM, %s as FKTABLE_NAME, ",
-                                quote(catalog), quote(schema), quote(table)) + "fcn as FKCOLUMN_NAME, "
-                + "ks as KEY_SEQ, " + "ur as UPDATE_RULE, " + "dr as DELETE_RULE, " + "'' as FK_NAME, "
-                + "'' as PK_NAME, " + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY from (";
+                + String.format(
+                        "ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, %s as FKTABLE_CAT, %s as FKTABLE_SCHEM, %s as FKTABLE_NAME, ",
+                        quote(catalog), quote(schema), quote(table)) + "fcn as FKCOLUMN_NAME, " + "ks as KEY_SEQ, "
+                + "ur as UPDATE_RULE, " + "dr as DELETE_RULE, " + "'' as FK_NAME, " + "'' as PK_NAME, "
+                + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY from (";
 
         // Use a try catch block to avoid "query does not return ResultSet" error
         try {
@@ -966,8 +1565,9 @@ class MetaData implements DatabaseMetaData
                 String updateRule = rs.getString(6);
                 String deleteRule = rs.getString(7);
 
-                if (i > 0)
+                if (i > 0) {
                     sql += " union all ";
+                }
 
                 sql += String.format("select %d as ks,", keySeq)
                         + String.format("'%s' as ptn, '%s' as fcn, '%s' as pcn,", escape(PKTabName), escape(FKColName),
@@ -995,6 +1595,10 @@ class MetaData implements DatabaseMetaData
         return stat.executeQuery(sql);
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getIndexInfo(java.lang.String, java.lang.String,
+     *      java.lang.String, boolean, boolean)
+     */
     public ResultSet getIndexInfo(String c, String s, String t, boolean u, boolean approximate) throws SQLException {
         String sql;
         ResultSet rs = null;
@@ -1007,21 +1611,21 @@ class MetaData implements DatabaseMetaData
 
         // Use a try catch block to avoid "query does not return ResultSet" error
         try {
-            ArrayList<ArrayList> indexList = new ArrayList<ArrayList>();
+            ArrayList<ArrayList<Object>> indexList = new ArrayList<ArrayList<Object>>();
 
             rs = stat.executeQuery("pragma index_list('" + escape(t) + "');");
             while (rs.next()) {
-                indexList.add(new ArrayList());
+                indexList.add(new ArrayList<Object>());
                 indexList.get(indexList.size() - 1).add(rs.getString(2));
                 indexList.get(indexList.size() - 1).add(rs.getInt(3));
             }
             rs.close();
 
             int i = 0;
-            Iterator indexIterator = indexList.iterator();
-            ArrayList currentIndex;
+            Iterator<ArrayList<Object>> indexIterator = indexList.iterator();
+            ArrayList<Object> currentIndex;
             while (indexIterator.hasNext()) {
-                currentIndex = (ArrayList) indexIterator.next();
+                currentIndex = indexIterator.next();
                 String indexName = currentIndex.get(0).toString();
                 int unique = (Integer) currentIndex.get(1);
 
@@ -1031,8 +1635,9 @@ class MetaData implements DatabaseMetaData
                     int ordinalPosition = rs.getInt(1) + 1;
                     String colName = rs.getString(3);
 
-                    if (i > 0)
+                    if (i > 0) {
                         sql += " union all ";
+                    }
 
                     sql += "select " + Integer.toString(1 - unique) + " as un," + "'" + escape(indexName) + "' as n,"
                             + Integer.toString(ordinalPosition) + " as op," + "'" + escape(colName) + "' as cn";
@@ -1049,48 +1654,77 @@ class MetaData implements DatabaseMetaData
         return stat.executeQuery(sql);
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getProcedureColumns(java.lang.String, java.lang.String,
+     *      java.lang.String, java.lang.String)
+     */
     public ResultSet getProcedureColumns(String c, String s, String p, String colPat) throws SQLException {
-        if (getProcedures == null)
+        if (getProcedures == null) {
             getProcedureColumns = conn.prepareStatement("select " + "null as PROCEDURE_CAT, "
                     + "null as PROCEDURE_SCHEM, " + "null as PROCEDURE_NAME, " + "null as COLUMN_NAME, "
                     + "null as COLUMN_TYPE, " + "null as DATA_TYPE, " + "null as TYPE_NAME, " + "null as PRECISION, "
                     + "null as LENGTH, " + "null as SCALE, " + "null as RADIX, " + "null as NULLABLE, "
                     + "null as REMARKS limit 0;");
+        }
         return getProcedureColumns.executeQuery();
 
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getProcedures(java.lang.String, java.lang.String,
+     *      java.lang.String)
+     */
     public ResultSet getProcedures(String c, String s, String p) throws SQLException {
-        if (getProcedures == null)
+        if (getProcedures == null) {
             getProcedures = conn.prepareStatement("select " + "null as PROCEDURE_CAT, " + "null as PROCEDURE_SCHEM, "
                     + "null as PROCEDURE_NAME, " + "null as UNDEF1, " + "null as UNDEF2, " + "null as UNDEF3, "
                     + "null as REMARKS, " + "null as PROCEDURE_TYPE limit 0;");
+        }
         return getProcedures.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getSuperTables(java.lang.String, java.lang.String,
+     *      java.lang.String)
+     */
     public ResultSet getSuperTables(String c, String s, String t) throws SQLException {
-        if (getSuperTables == null)
+        if (getSuperTables == null) {
             getSuperTables = conn.prepareStatement("select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, "
                     + "null as TABLE_NAME, " + "null as SUPERTABLE_NAME limit 0;");
+        }
         return getSuperTables.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getSuperTypes(java.lang.String, java.lang.String,
+     *      java.lang.String)
+     */
     public ResultSet getSuperTypes(String c, String s, String t) throws SQLException {
-        if (getSuperTypes == null)
+        if (getSuperTypes == null) {
             getSuperTypes = conn.prepareStatement("select " + "null as TYPE_CAT, " + "null as TYPE_SCHEM, "
                     + "null as TYPE_NAME, " + "null as SUPERTYPE_CAT, " + "null as SUPERTYPE_SCHEM, "
                     + "null as SUPERTYPE_NAME limit 0;");
+        }
         return getSuperTypes.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getTablePrivileges(java.lang.String, java.lang.String,
+     *      java.lang.String)
+     */
     public ResultSet getTablePrivileges(String c, String s, String t) throws SQLException {
-        if (getTablePrivileges == null)
+        if (getTablePrivileges == null) {
             getTablePrivileges = conn.prepareStatement("select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, "
                     + "null as TABLE_NAME, " + "null as GRANTOR, " + "null as GRANTEE, " + "null as PRIVILEGE, "
                     + "null as IS_GRANTABLE limit 0;");
+        }
         return getTablePrivileges.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getTables(java.lang.String, java.lang.String,
+     *      java.lang.String, java.lang.String[])
+     */
     public synchronized ResultSet getTables(String c, String s, String t, String[] types) throws SQLException {
         checkOpen();
 
@@ -1105,8 +1739,9 @@ class MetaData implements DatabaseMetaData
         if (types != null) {
             sql += " and TABLE_TYPE in (";
             for (int i = 0; i < types.length; i++) {
-                if (i > 0)
+                if (i > 0) {
                     sql += ", ";
+                }
                 sql += "'" + types[i].toUpperCase() + "'";
             }
             sql += ")";
@@ -1117,15 +1752,22 @@ class MetaData implements DatabaseMetaData
         return conn.createStatement().executeQuery(sql);
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getTableTypes()
+     */
     public ResultSet getTableTypes() throws SQLException {
         checkOpen();
-        if (getTableTypes == null)
+        if (getTableTypes == null) {
             getTableTypes = conn.prepareStatement("select 'TABLE' as TABLE_TYPE"
                     + " union select 'VIEW' as TABLE_TYPE;");
+        }
         getTableTypes.clearParameters();
         return getTableTypes.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getTypeInfo()
+     */
     public ResultSet getTypeInfo() throws SQLException {
         if (getTypeInfo == null) {
             getTypeInfo = conn.prepareStatement("select " + "tn as TYPE_NAME, " + "dt as DATA_TYPE, "
@@ -1165,50 +1807,174 @@ class MetaData implements DatabaseMetaData
         return getTypeInfo.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getUDTs(java.lang.String, java.lang.String, java.lang.String,
+     *      int[])
+     */
     public ResultSet getUDTs(String c, String s, String t, int[] types) throws SQLException {
-        if (getUDTs == null)
+        if (getUDTs == null) {
             getUDTs = conn.prepareStatement("select " + "null as TYPE_CAT, " + "null as TYPE_SCHEM, "
                     + "null as TYPE_NAME, " + "null as CLASS_NAME, " + "null as DATA_TYPE, " + "null as REMARKS, "
                     + "null as BASE_TYPE " + "limit 0;");
+        }
 
         getUDTs.clearParameters();
         return getUDTs.executeQuery();
     }
 
+    /**
+     * @see java.sql.DatabaseMetaData#getVersionColumns(java.lang.String, java.lang.String,
+     *      java.lang.String)
+     */
     public ResultSet getVersionColumns(String c, String s, String t) throws SQLException {
-        if (getVersionColumns == null)
+        if (getVersionColumns == null) {
             getVersionColumns = conn.prepareStatement("select " + "null as SCOPE, " + "null as COLUMN_NAME, "
                     + "null as DATA_TYPE, " + "null as TYPE_NAME, " + "null as COLUMN_SIZE, "
                     + "null as BUFFER_LENGTH, " + "null as DECIMAL_DIGITS, " + "null as PSEUDO_COLUMN limit 0;");
+        }
         return getVersionColumns.executeQuery();
     }
 
+    /**
+     * @return Generated row id of the last INSERT command.
+     * @throws SQLException
+     */
     ResultSet getGeneratedKeys() throws SQLException {
-        if (getGeneratedKeys == null)
+        if (getGeneratedKeys == null) {
             getGeneratedKeys = conn.prepareStatement("select last_insert_rowid();");
+        }
         return getGeneratedKeys.executeQuery();
     }
 
-    /** Replace all instances of ' with '' */
+    /**
+     * Applies SQL escapes for special characters in a given string.
+     * @param val The string to escape.
+     * @return The SQL escaped string.
+     */
     private String escape(final String val) {
         // TODO: this function is ugly, pass this work off to SQLite, then we
         //       don't have to worry about Unicode 4, other characters needing
         //       escaping, etc.
         int len = val.length();
-        StringBuffer buf = new StringBuffer(len);
+        StringBuilder buf = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
-            if (val.charAt(i) == '\'')
+            if (val.charAt(i) == '\'') {
                 buf.append('\'');
+            }
             buf.append(val.charAt(i));
         }
         return buf.toString();
     }
 
+    /** Not implemented yet. */
     public Struct createStruct(String t, Object[] attr) throws SQLException {
         throw new SQLException("Not yet implemented by SQLite JDBC driver");
     }
 
+    /** Not implemented yet. */
     public ResultSet getFunctionColumns(String a, String b, String c, String d) throws SQLException {
         throw new SQLException("Not yet implemented by SQLite JDBC driver");
+    }
+
+    // inner classes
+
+    /**
+     * Pattern used to extract column order for an unnamed primary key.
+     */
+    protected final static Pattern PK_UNNAMED_PATTERN =
+            Pattern.compile(".* primary +key *\\((.*?,+.*?)\\).*", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Pattern used to extract a named primary key.
+     */
+     protected final static Pattern PK_NAMED_PATTERN =
+         Pattern.compile(".* constraint +(.*?) +primary +key *\\((.*?)\\).*", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Parses the sqlite_master table for a table's primary key
+     */
+    class PrimaryKeyFinder {
+        /** The table name. */
+        String table;
+
+        /** The primary key name. */
+        String pkName = null;
+
+        /** The column(s) for the primary key. */
+        String pkColumns[] = null;
+
+        /**
+         * Constructor.
+         * @param table The table for which to get find a primary key.
+         * @throws SQLException
+         */
+        public PrimaryKeyFinder(String table) throws SQLException {
+            this.table = table;
+
+            if (table == null || table.trim().length() == 0) {
+                throw new SQLException("Invalid table name: '" + this.table + "'");
+            }
+
+            Statement stat = null;
+            ResultSet rs = null;
+
+            try {
+                stat = conn.createStatement();
+                // read create SQL script for table
+                rs = stat.executeQuery("select sql from sqlite_master where" +
+                    " lower(name) = lower('" + escape(table) + "') and type = 'table'");
+
+                if (!rs.next())
+                    throw new SQLException("Table not found: '" + table + "'");
+
+                Matcher matcher = PK_NAMED_PATTERN.matcher(rs.getString(1));
+                if (matcher.find()){
+                    pkName = '\'' + escape(matcher.group(1).toLowerCase()) + '\'';
+                    pkColumns = matcher.group(2).split(",");
+                }
+                else {
+                    matcher = PK_UNNAMED_PATTERN.matcher(rs.getString(1));
+                    if (matcher.find()){
+                        pkColumns = matcher.group(1).split(",");
+                    }
+                }
+
+                if (pkColumns == null) {
+                    rs = stat.executeQuery("pragma table_info('" + escape(table) + "');");
+                    while(rs.next()) {
+                        if (rs.getBoolean(6))
+                            pkColumns = new String[]{rs.getString(2)};
+                    }
+                }
+
+                if (pkColumns != null)
+                    for (int i = 0; i < pkColumns.length; i++) {
+                        pkColumns[i] = pkColumns[i].toLowerCase().trim();
+                    }
+                //FIXME: close stat
+            }
+            finally {
+                try {
+                    if (rs != null) rs.close();
+                } catch (Exception e1) {}
+                try {
+                    if (stat != null) stat.close();
+                } catch (Exception e1) {}
+            }
+        }
+
+        /**
+         * @return The primary key name if any.
+         */
+        public String getName() {
+            return pkName;
+        }
+
+        /**
+         * @return Array of primary key column(s) if any.
+         */
+        public String[] getColumns() {
+            return pkColumns;
+        }
     }
 }

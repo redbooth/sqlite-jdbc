@@ -174,7 +174,7 @@ static void xFunc_error(sqlite3_context *context, JNIEnv *env)
 }
 
 /* used to call xFunc, xStep and xFinal */
-static xCall(
+static void xCall(
     sqlite3_context *context,
     int args,
     sqlite3_value** value,
@@ -388,7 +388,9 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB__1exec(
         JNIEnv *env, jobject this, jstring sql)
 {
     sqlite3* db = gethandle(env, this);
-    sqlite3_stmt* stmt;
+    const char *strsql;
+    char* errorMsg;
+    int status;
 	
 	if(!db)
 	{
@@ -396,9 +398,8 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB__1exec(
 		return 21;
 	}
 
-    const char *strsql = (*env)->GetStringUTFChars(env, sql, 0);
-    char* errorMsg;
-    int status = sqlite3_exec(db, strsql, 0, 0, &errorMsg);
+    strsql = (*env)->GetStringUTFChars(env, sql, 0);
+    status = sqlite3_exec(db, strsql, 0, 0, &errorMsg);
     
     (*env)->ReleaseStringUTFChars(env, sql, strsql);
 
@@ -428,6 +429,12 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_changes(
     return sqlite3_changes(gethandle(env, this));
 }
 
+JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_total_1changes(
+        JNIEnv *env, jobject this)
+{
+    return sqlite3_total_changes(gethandle(env, this));
+}
+
 JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_finalize(
         JNIEnv *env, jobject this, jlong stmt)
 {
@@ -449,13 +456,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_reset(
 JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_clear_1bindings(
         JNIEnv *env, jobject this, jlong stmt)
 {
-    int i;
-    int count = sqlite3_bind_parameter_count(toref(stmt));
-    jint rc = SQLITE_OK;
-    for(i=1; rc==SQLITE_OK && i <= count; i++) {
-        rc = sqlite3_bind_null(toref(stmt), i);
-    }
-    return rc;
+    return sqlite3_clear_bindings(toref(stmt));
 }
 
 JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_bind_1parameter_1count(
@@ -755,11 +756,15 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_create_1function(
 JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_destroy_1function(
         JNIEnv *env, jobject this, jstring name)
 {
+    jint ret = 0;
     const char* strname = (*env)->GetStringUTFChars(env, name, 0);
-    sqlite3_create_function(
+    
+    ret = sqlite3_create_function(
         gethandle(env, this), strname, -1, SQLITE_UTF16, 0, 0, 0, 0
     );
     (*env)->ReleaseStringUTFChars(env, name, strname);
+
+    return ret;
 }
 
 JNIEXPORT void JNICALL Java_org_sqlite_NativeDB_free_1functions(

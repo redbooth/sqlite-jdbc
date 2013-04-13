@@ -55,33 +55,46 @@ public class SQLiteJDBCLoader
 
     private static boolean extracted = false;
 
-    public static boolean initialize() {
+    /**
+     * Loads SQLite native JDBC library.
+     * @return True if SQLite native library is successfully loaded; false otherwise.
+     */
+    public static boolean initialize() throws Exception {
         loadSQLiteNativeLibrary();
         return extracted;
     }
 
+    /**
+     * @return True if the SQLite JDBC driver is set to pure Java mode; false otherwise.
+     * @deprecated Pure Java no longer supported 
+     */
     static boolean getPureJavaFlag() {
         return Boolean.parseBoolean(System.getProperty("sqlite.purejava", "false"));
     }
 
+    /**
+     * Checks if the SQLite JDBC driver is set to pure Java mode. 
+     * @return True if the SQLite JDBC driver is set to pure Java mode; false otherwise.
+     * @deprecated Pure Java nolonger supported
+     */
     public static boolean isPureJavaMode() {
-        return !isNativeMode();
+        return false;
     }
 
-    public static boolean isNativeMode() {
-        if (getPureJavaFlag())
-            return false;
-
+    /**
+     * Checks if the SQLite JDBC driver is set to native mode. 
+     * @return True if the SQLite JDBC driver is set to native Java mode; false otherwise.
+     */
+    public static boolean isNativeMode() throws Exception {
         // load the driver
         initialize();
         return extracted;
     }
 
     /**
-     * Computes the MD5 value of the input stream
-     * 
-     * @param input
-     * @return
+     * Computes the MD5 value of the input stream.
+     * @param input InputStream.
+     * @return Encrypted string for the InputStream.
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
@@ -107,17 +120,18 @@ public class SQLiteJDBCLoader
     }
 
     /**
-     * Extract the specified library file to the target folder
-     * 
-     * @param libFolderForCurrentOS
-     * @param libraryFileName
-     * @param targetFolder
+     * Extracts and loads the specified library file to the target folder
+     * @param libFolderForCurrentOS Library path.
+     * @param libraryFileName Library name.
+     * @param targetFolder Target folder.
      * @return
      */
     private static boolean extractAndLoadLibraryFile(String libFolderForCurrentOS, String libraryFileName,
             String targetFolder) {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
-        final String prefix = "sqlite-" + getVersion() + "-";
+        // Include architecture name in temporary filename in order to avoid conflicts
+        // when multiple JVMs with different architectures running at the same time
+        final String prefix = "sqlite-" + getVersion() + "-" + OSInfo.getArchName() + "-";
 
         String extractedLibFileName = prefix + libraryFileName;
         File extractedLibFile = new File(targetFolder, extractedLibFileName);
@@ -170,6 +184,12 @@ public class SQLiteJDBCLoader
 
     }
 
+    /**
+     * Loads native library using the given path and name of the library.
+     * @param path Path of the native library.
+     * @param name Name  of the native library.
+     * @return True for successfully loading; false otherwise.
+     */
     private static synchronized boolean loadNativeLibrary(String path, String name) {
         File libPath = new File(path, name);
         if (libPath.exists()) {
@@ -188,21 +208,23 @@ public class SQLiteJDBCLoader
             return false;
     }
 
-    private static void loadSQLiteNativeLibrary() {
+    /**
+     * Loads SQLite native library using given path and name of the library.
+     * @exception
+     */
+    private static void loadSQLiteNativeLibrary() throws Exception {
         if (extracted)
             return;
-
-        boolean runInPureJavaMode = getPureJavaFlag();
-        if (runInPureJavaMode) {
-            extracted = false;
-            return;
-        }
 
         // Try loading library from org.sqlite.lib.path library path */
         String sqliteNativeLibraryPath = System.getProperty("org.sqlite.lib.path");
         String sqliteNativeLibraryName = System.getProperty("org.sqlite.lib.name");
-        if (sqliteNativeLibraryName == null)
+        if (sqliteNativeLibraryName == null) {
             sqliteNativeLibraryName = System.mapLibraryName("sqlitejdbc");
+            if (sqliteNativeLibraryName != null && sqliteNativeLibraryName.endsWith("dylib")) {
+            	sqliteNativeLibraryName = sqliteNativeLibraryName.replace("dylib", "jnilib");
+            }
+        }
 
         if (sqliteNativeLibraryPath != null) {
             if (loadNativeLibrary(sqliteNativeLibraryPath, sqliteNativeLibraryName)) {
@@ -211,12 +233,12 @@ public class SQLiteJDBCLoader
             }
         }
 
-        // Load the os-dependent library from a jar file
-        sqliteNativeLibraryPath = "/native/" + OSInfo.getNativeLibFolderPathForCurrentOS();
+        // Load the os-dependent library from the jar file
+        sqliteNativeLibraryPath = "/org/sqlite/native/" + OSInfo.getNativeLibFolderPathForCurrentOS();
 
         if (SQLiteJDBCLoader.class.getResource(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName) == null) {
-            // use nested VM version
-            return;
+            extracted = false;
+            throw new Exception("Error loading native library: " + sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName);
         }
 
         // temporary library folder
@@ -231,22 +253,31 @@ public class SQLiteJDBCLoader
         return;
     }
 
+    @SuppressWarnings("unused")
     private static void getNativeLibraryFolderForTheCurrentOS() {
         String osName = OSInfo.getOSName();
         String archName = OSInfo.getArchName();
-
     }
 
+    /**
+     * @return The major version of the SQLite JDBC driver.
+     */
     public static int getMajorVersion() {
         String[] c = getVersion().split("\\.");
         return (c.length > 0) ? Integer.parseInt(c[0]) : 1;
     }
 
+    /**
+     * @return The minor version of the SQLite JDBC driver.
+     */
     public static int getMinorVersion() {
         String[] c = getVersion().split("\\.");
         return (c.length > 1) ? Integer.parseInt(c[1]) : 0;
     }
 
+    /**
+     * @return The version of the SQLite JDBC driver.
+     */
     public static String getVersion() {
 
         URL versionFile = SQLiteJDBCLoader.class.getResource("/META-INF/maven/org.xerial/sqlite-jdbc/pom.properties");
