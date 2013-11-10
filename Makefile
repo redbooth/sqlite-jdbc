@@ -23,7 +23,7 @@ CFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_AMAL_DIR) $(CFLAGS)
 
 $(SQLITE_ARCHIVE):
 	@mkdir -p $(@D)
-	curl -o$@ http://www.sqlite.org/$(SQLITE_AMAL_PREFIX).zip
+	curl -o$@ http://www.sqlite.org/2013/$(SQLITE_AMAL_PREFIX).zip
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
 	unzip -qo $< -d $(TARGET)
@@ -47,23 +47,13 @@ clean: clean-native clean-java clean-tests
 
 $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	@mkdir -p $(@D)
-	perl -p -e "s/sqlite3_api;/sqlite3_api = 0;/g" \
-	    $(SQLITE_AMAL_DIR)/sqlite3ext.h > $(SQLITE_OUT)/sqlite3ext.h
-# insert a code for loading extension functions
-	perl -p -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" \
-	    $(SQLITE_AMAL_DIR)/sqlite3.c > $(SQLITE_OUT)/sqlite3.c
-	cat src/main/ext/*.c >> $(SQLITE_OUT)/sqlite3.c
 	$(CC) -o $@ -c $(CFLAGS) \
-	    -DSQLITE_ENABLE_LOAD_EXTENSION=1 \
 	    -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
 	    -DSQLITE_ENABLE_COLUMN_METADATA \
 	    -DSQLITE_CORE \
-	    -DSQLITE_ENABLE_FTS3 \
-	    -DSQLITE_ENABLE_FTS3_PARENTHESIS \
-	    -DSQLITE_ENABLE_RTREE \
-	    -DSQLITE_ENABLE_STAT2 \
+	    -DSQLITE_THREADSAFE=0 \
 	    $(SQLITE_FLAGS) \
-	    $(SQLITE_OUT)/sqlite3.c
+	    $(SQLITE_AMAL_DIR)/sqlite3.c
 
 $(SQLITE_OUT)/$(LIBNAME): $(SQLITE_OUT)/sqlite3.o $(SRC)/org/sqlite/NativeDB.c $(SQLITE_OUT)/NativeDB.h
 	@mkdir -p $(@D)
@@ -71,10 +61,8 @@ $(SQLITE_OUT)/$(LIBNAME): $(SQLITE_OUT)/sqlite3.o $(SRC)/org/sqlite/NativeDB.c $
 	$(CC) $(CFLAGS) -o $@ $(SQLITE_OUT)/*.o $(LINKFLAGS)
 	$(STRIP) $@
 
-
-NATIVE_DIR=src/main/resources/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
+NATIVE_DLL:=$(TARGET)/lib/$(OS_NAME)/$(OS_ARCH)/$(LIBNAME)
 NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
-NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 native: $(SQLITE_UNPACKED) $(NATIVE_DLL)
 
