@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 
 public class ExtensionTest
 {
@@ -38,6 +39,8 @@ public class ExtensionTest
 
     }
 
+    // building a trimmed-down SQLite
+    @Ignore
     @Test
     public void extFTS3() throws Exception {
 
@@ -53,6 +56,8 @@ public class ExtensionTest
 
     }
 
+    // building a trimmed-down SQLite
+    @Ignore
     @Test
     public void extFunctions() throws Exception {
 

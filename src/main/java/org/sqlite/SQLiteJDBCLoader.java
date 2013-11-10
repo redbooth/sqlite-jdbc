@@ -52,42 +52,27 @@ import java.util.Properties;
  */
 public class SQLiteJDBCLoader
 {
-
+    private static String version;
+    private static INativeLibraryLoader customLoader;
     private static boolean extracted = false;
+
+    public static interface INativeLibraryLoader
+    {
+        boolean loadLibrary() throws Exception;
+    }
+
+    public static void setCustomLoader(INativeLibraryLoader loader)
+    {
+        customLoader = loader;
+    }
 
     /**
      * Loads SQLite native JDBC library.
      * @return True if SQLite native library is successfully loaded; false otherwise.
      */
     public static boolean initialize() throws Exception {
+        if (customLoader != null) return customLoader.loadLibrary();
         loadSQLiteNativeLibrary();
-        return extracted;
-    }
-
-    /**
-     * @return True if the SQLite JDBC driver is set to pure Java mode; false otherwise.
-     * @deprecated Pure Java no longer supported 
-     */
-    static boolean getPureJavaFlag() {
-        return Boolean.parseBoolean(System.getProperty("sqlite.purejava", "false"));
-    }
-
-    /**
-     * Checks if the SQLite JDBC driver is set to pure Java mode. 
-     * @return True if the SQLite JDBC driver is set to pure Java mode; false otherwise.
-     * @deprecated Pure Java nolonger supported
-     */
-    public static boolean isPureJavaMode() {
-        return false;
-    }
-
-    /**
-     * Checks if the SQLite JDBC driver is set to native mode. 
-     * @return True if the SQLite JDBC driver is set to native Java mode; false otherwise.
-     */
-    public static boolean isNativeMode() throws Exception {
-        // load the driver
-        initialize();
         return extracted;
     }
 
@@ -279,12 +264,13 @@ public class SQLiteJDBCLoader
      * @return The version of the SQLite JDBC driver.
      */
     public static String getVersion() {
+        if (version != null) return version;
 
         URL versionFile = SQLiteJDBCLoader.class.getResource("/META-INF/maven/org.xerial/sqlite-jdbc/pom.properties");
         if (versionFile == null)
             versionFile = SQLiteJDBCLoader.class.getResource("/META-INF/maven/org.xerial/sqlite-jdbc/VERSION");
 
-        String version = "unknown";
+        version = "unknown";
         try {
             if (versionFile != null) {
                 Properties versionData = new Properties();

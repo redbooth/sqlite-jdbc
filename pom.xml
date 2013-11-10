@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.7.15-SNAPSHOT</version>
+  <version>3.7.16</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -42,15 +42,19 @@
   
   <build>
     <resources>
+      <!-- Uncomment to bundle source in the jar
       <resource>
         <directory>src/main/java</directory>
       </resource>
+      -->
+      <!-- Uncomment to bundle native libraries in the jar (NB: need to modify Makefile to move them to the right place
       <resource>
         <directory>src/main/resources</directory>
         <includes>
           <include>org/**</include>
         </includes>
       </resource>
+      -->
       <resource>
         <directory>src/main/resources</directory>
         <targetPath>META-INF/services</targetPath>
@@ -93,12 +97,6 @@
           <target>1.5</target>
         </configuration>
       </plugin>
-      
-      <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-surefire-report-plugin</artifactId>
-	<version>2.6</version>
-      </plugin>
 
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
@@ -106,37 +104,17 @@
         <configuration>
           <!--  do not run site-deploy goal, included in the default settings  -->
           <goals>deploy</goals>
-          <pushChanges>false</pushChanges>
-          <localCheckout>true</localCheckout>
-          <connectionUrl>scm:hg:ssh://hg@bitbucket.org/xerial/sqlite-jdbc</connectionUrl>
+          <connectionUrl>scm:hg:ssh://hg@bitbucket.org/huguesb/sqlite-jdbc</connectionUrl>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.4</version>
-        <configuration>
-          <useAgent>true</useAgent>
-        </configuration>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>sign</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
 
   </build>
 
   <scm>
-    <connection>scm:hg:https://bitbucket.org/xerial/sqlite-jdbc</connection>
-    <developerConnection>scm:hg:ssh://hg@bitbucket.org/xerial/sqlite-jdbc</developerConnection>
-    <url>https://bitbucket.org/xerial/sqlite-jdbc</url>
+    <connection>scm:hg:https://bitbucket.org/huguesb/sqlite-jdbc</connection>
+    <developerConnection>scm:hg:ssh://hg@bitbucket.org/huguesb/sqlite-jdbc</developerConnection>
+    <url>https://bitbucket.org/huguesb/sqlite-jdbc</url>
   </scm>
 
   <dependencies>
