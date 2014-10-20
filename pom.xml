@@ -47,14 +47,12 @@
         <directory>src/main/java</directory>
       </resource>
       -->
-      <!-- Uncomment to bundle native libraries in the jar (NB: need to modify Makefile to move them to the right place
       <resource>
         <directory>src/main/resources</directory>
         <includes>
           <include>org/**</include>
         </includes>
       </resource>
-      -->
       <resource>
         <directory>src/main/resources</directory>
         <targetPath>META-INF/services</targetPath>
@@ -95,6 +93,17 @@
           </compilerArgument>
           <source>1.5</source>
           <target>1.5</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <excludes>
+            <exclude>org/sqlite/native/**</exclude>
+          </excludes>
         </configuration>
       </plugin>
 
