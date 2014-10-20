@@ -86,13 +86,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-	<version>3.1</version>
+        <version>3.1</version>
         <configuration>
-          <compilerArgument>
-            -Xbootclasspath/p:${basedir}/lib/jdbc-api-1.4.jar
-          </compilerArgument>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
 
@@ -109,7 +106,7 @@
 
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
-	<version>2.1</version>
+        <version>2.1</version>
         <configuration>
           <!--  do not run site-deploy goal, included in the default settings  -->
           <goals>deploy</goals>

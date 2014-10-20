@@ -482,6 +482,26 @@ class Stmt extends Unused implements Statement, Codes
         return ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
+    public boolean isClosed() throws SQLException {
+        return pointer == 0;
+    }
+
+    public void setPoolable(boolean poolable) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean isPoolable() throws SQLException {
+        return false;
+    }
+
+    public void closeOnCompletion() throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean isCloseOnCompletion() throws SQLException {
+        return false;
+    }
+
     /**
      * @see java.sql.Statement#getResultSetType()
      */

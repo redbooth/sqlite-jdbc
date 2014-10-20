@@ -31,6 +31,14 @@ abstract class Unused
         return new SQLException("not implemented by SQLite JDBC driver");
     }
 
+    // Wrapper
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw unused();
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return false;
+    }
 
     // Statement ////////////////////////////////////////////////////
 
@@ -47,6 +55,22 @@ abstract class Unused
     public boolean execute(String sql, int autokeys)
         throws SQLException { throw unused(); }
 
+    public void setRowId(int parameterIndex, RowId x)
+            throws SQLException { throw unused(); }
+    public void setNString(int parameterIndex, String value)
+            throws SQLException { throw unused(); }
+    public void setNCharacterStream(int parameterIndex, Reader value, long length)
+            throws SQLException { throw unused(); }
+    public void setNClob(int parameterIndex, NClob value)
+            throws SQLException { throw unused(); }
+    public void setClob(int parameterIndex, Reader reader, long length)
+            throws SQLException { throw unused(); }
+    public void setBlob(int parameterIndex, InputStream inputStream, long length)
+            throws SQLException { throw unused(); }
+    public void setNClob(int parameterIndex, Reader reader, long length)
+            throws SQLException { throw unused(); }
+    public void setSQLXML(int parameterIndex, SQLXML xmlObject)
+            throws SQLException { throw unused(); }
 
     // PreparedStatement ////////////////////////////////////////////
 
@@ -62,6 +86,27 @@ abstract class Unused
         throws SQLException { throw unused(); }
     public void setURL(int pos, URL x)
         throws SQLException { throw unused(); }
+
+    public void setAsciiStream(int parameterIndex, InputStream x, long length)
+            throws SQLException { throw unused(); }
+    public void setBinaryStream(int parameterIndex, InputStream x, long length)
+            throws SQLException { throw unused(); }
+    public void setCharacterStream(int parameterIndex, Reader reader, long length)
+            throws SQLException { throw unused(); }
+    public void setAsciiStream(int parameterIndex, InputStream x)
+            throws SQLException { throw unused(); }
+    public void setBinaryStream(int parameterIndex, InputStream x)
+            throws SQLException { throw unused(); }
+    public void setCharacterStream(int parameterIndex, Reader reader)
+            throws SQLException { throw unused(); }
+    public void setNCharacterStream(int parameterIndex, Reader value)
+            throws SQLException { throw unused(); }
+    public void setClob(int parameterIndex, Reader reader)
+            throws SQLException { throw unused(); }
+    public void setBlob(int parameterIndex, InputStream inputStream)
+            throws SQLException { throw unused(); }
+    public void setNClob(int parameterIndex, Reader reader)
+            throws SQLException { throw unused(); }
 
 
     // ResultSet ////////////////////////////////////////////////////
@@ -233,4 +278,54 @@ abstract class Unused
 
     public void refreshRow()
         throws SQLException { throw unused(); }
+
+
+    public RowId getRowId(int columnIndex) throws SQLException { throw unused(); }
+    public RowId getRowId(String columnLabel) throws SQLException { throw unused(); }
+    public void updateRowId(int columnIndex, RowId x) throws SQLException { throw unused(); }
+    public void updateRowId(String columnLabel, RowId x) throws SQLException { throw unused(); }
+    public void updateNString(int columnIndex, String nString) throws SQLException { throw unused(); }
+    public void updateNString(String columnLabel, String nString) throws SQLException { throw unused(); }
+    public void updateNClob(int columnIndex, NClob nClob) throws SQLException { throw unused(); }
+    public void updateNClob(String columnLabel, NClob nClob) throws SQLException { throw unused(); }
+    public NClob getNClob(int columnIndex) throws SQLException { throw unused(); }
+    public NClob getNClob(String columnLabel) throws SQLException { throw unused(); }
+    public SQLXML getSQLXML(int columnIndex) throws SQLException { throw unused(); }
+    public SQLXML getSQLXML(String columnLabel) throws SQLException { throw unused(); }
+    public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException { throw unused(); }
+    public void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException { throw unused(); }
+    public String getNString(int columnIndex) throws SQLException { throw unused(); }
+    public String getNString(String columnLabel) throws SQLException { throw unused(); }
+    public Reader getNCharacterStream(int columnIndex) throws SQLException { throw unused(); }
+    public Reader getNCharacterStream(String columnLabel) throws SQLException { throw unused(); }
+    public void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException { throw unused(); }
+    public void updateNCharacterStream(String columnLabel, Reader reader, long length) throws SQLException { throw unused(); }
+    public void updateAsciiStream(int columnIndex, InputStream x, long length) throws SQLException { throw unused(); }
+    public void updateBinaryStream(int columnIndex, InputStream x, long length) throws SQLException { throw unused(); }
+    public void updateCharacterStream(int columnIndex, Reader x, long length) throws SQLException { throw unused(); }
+    public void updateAsciiStream(String columnLabel, InputStream x, long length) throws SQLException { throw unused(); }
+    public void updateBinaryStream(String columnLabel, InputStream x, long length) throws SQLException { throw unused(); }
+    public void updateCharacterStream(String columnLabel, Reader reader, long length) throws SQLException { throw unused(); }
+    public void updateBlob(int columnIndex, InputStream inputStream, long length) throws SQLException { throw unused(); }
+    public void updateBlob(String columnLabel, InputStream inputStream, long length) throws SQLException { throw unused(); }
+    public void updateClob(int columnIndex, Reader reader, long length) throws SQLException { throw unused(); }
+    public void updateClob(String columnLabel, Reader reader, long length) throws SQLException { throw unused(); }
+    public void updateNClob(int columnIndex, Reader reader, long length) throws SQLException { throw unused(); }
+    public void updateNClob(String columnLabel, Reader reader, long length) throws SQLException { throw unused(); }
+    public void updateNCharacterStream(int columnIndex, Reader x) throws SQLException { throw unused(); }
+    public void updateNCharacterStream(String columnLabel, Reader reader) throws SQLException { throw unused(); }
+    public void updateAsciiStream(int columnIndex, InputStream x) throws SQLException { throw unused(); }
+    public void updateBinaryStream(int columnIndex, InputStream x) throws SQLException { throw unused(); }
+    public void updateCharacterStream(int columnIndex, Reader x) throws SQLException { throw unused(); }
+    public void updateAsciiStream(String columnLabel, InputStream x) throws SQLException { throw unused(); }
+    public void updateBinaryStream(String columnLabel, InputStream x) throws SQLException { throw unused(); }
+    public void updateCharacterStream(String columnLabel, Reader reader) throws SQLException { throw unused(); }
+    public void updateBlob(int columnIndex, InputStream inputStream) throws SQLException { throw unused(); }
+    public void updateBlob(String columnLabel, InputStream inputStream) throws SQLException { throw unused(); }
+    public void updateClob(int columnIndex, Reader reader) throws SQLException { throw unused(); }
+    public void updateClob(String columnLabel, Reader reader) throws SQLException { throw unused(); }
+    public void updateNClob(int columnIndex, Reader reader) throws SQLException { throw unused(); }
+    public void updateNClob(String columnLabel, Reader reader) throws SQLException { throw unused(); }
+    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException { throw unused(); }
+    public <T> T getObject(String columnLabel, Class<T> type) throws SQLException { throw unused(); }
 }

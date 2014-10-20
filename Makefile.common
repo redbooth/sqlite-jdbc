@@ -7,7 +7,8 @@ endif
 libjdbc  := $(wildcard lib/jdbc-*.jar)
 
 JAVA  := "$$JAVA_HOME/bin/java"
-JAVAC := "$$JAVA_HOME/bin/javac" -Xbootclasspath/p:$(libjdbc)
+JAVAC := "$$JAVA_HOME/bin/javac"
+# -Xbootclasspath/p:$(libjdbc)
 JAVAH := "$$JAVA_HOME/bin/javah"
 
 TARGET := target

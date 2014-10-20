@@ -22,21 +22,13 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.sql.Struct;
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 import org.sqlite.SQLiteConfig.DateClass;
 import org.sqlite.SQLiteConfig.DatePrecision;
@@ -293,7 +285,7 @@ public class SQLiteConnection implements Connection
 
     /**
      * Whether an SQLite library interface to the database has been established.
-     * @throws SQLException.
+     * @throws SQLException
      */
     private void checkOpen() throws SQLException {
         if (db == null)
@@ -304,9 +296,9 @@ public class SQLiteConnection implements Connection
      * Checks whether the type, concurrency, and holdability settings for a
      * {@link ResultSet} are supported by the SQLite interface. Supported
      * settings are:<ul>
-     *  <li>type: {@link ResultSet.TYPE_FORWARD_ONLY}</li>
-     *  <li>concurrency: {@link ResultSet.CONCUR_READ_ONLY})</li>
-     *  <li>holdability: {@link ResultSet.CLOSE_CURSORS_AT_COMMIT}</li></ul>
+     *  <li>type: {@link ResultSet#TYPE_FORWARD_ONLY}</li>
+     *  <li>concurrency: {@link ResultSet#CONCUR_READ_ONLY})</li>
+     *  <li>holdability: {@link ResultSet#CLOSE_CURSORS_AT_COMMIT}</li></ul>
      * @param rst the type setting.
      * @param rsc the concurrency setting.
      * @param rsh the holdability setting.
@@ -348,6 +340,8 @@ public class SQLiteConnection implements Connection
     public boolean isClosed() throws SQLException {
         return db == null;
     }
+
+    public boolean isValid(int timeout) throws SQLException { return !isClosed(); }
 
     /**
      * @see java.sql.Connection#getCatalog()
@@ -599,6 +593,21 @@ public class SQLiteConnection implements Connection
         return prepareStatement(sql);
     }
 
+    public Clob createClob() throws SQLException { throw new SQLException("unsupported"); }
+    public Blob createBlob() throws SQLException { throw new SQLException("unsupported"); }
+    public NClob createNClob() throws SQLException { throw new SQLException("unsupported"); }
+    public SQLXML createSQLXML() throws SQLException { throw new SQLException("unsupported"); }
+
+    public void setClientInfo(String name, String value) throws SQLClientInfoException
+    { throw new SQLClientInfoException(); }
+    public void setClientInfo(Properties properties) throws SQLClientInfoException
+    { throw new SQLClientInfoException(); }
+    public String getClientInfo(String name) throws SQLException { return null; }
+    public Properties getClientInfo() throws SQLException { return null; }
+
+    public Array createArrayOf(String typeName, Object[] elements)
+            throws SQLException { throw new SQLException("unsupported"); }
+
     /**
      * @see java.sql.Connection#prepareStatement(java.lang.String, int, int)
      */
@@ -656,5 +665,33 @@ public class SQLiteConnection implements Connection
 
     public Struct createStruct(String t, Object[] attr) throws SQLException {
         throw new SQLException("unsupported by SQLite");
+    }
+
+    public void setSchema(String schema) throws SQLException {
+        if (isClosed()) throw new SQLException("connection close");
+    }
+
+    public String getSchema() throws SQLException {
+        return null;
+    }
+
+    public void abort(Executor executor) throws SQLException {
+        close();
+    }
+
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        throw new SQLException("unsupported");
+    }
+
+    public int getNetworkTimeout() throws SQLException {
+        return 0;
+    }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new SQLException("unsupported");
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return false;
     }
 }
