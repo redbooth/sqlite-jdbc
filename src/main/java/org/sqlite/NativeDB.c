@@ -17,6 +17,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+
+/**
+ * Fix JNIEXPORT to work when compiled with -fvisibility=hidden with JDK < 8
+ */
+#include <jni.h>
+#if !(defined _WIN32 || defined __CYGWIN__) && __GNUC__ >= 4
+  #undef JNIEPXORT
+  #define JNIEXPORT __attribute__ ((visibility ("default")))
+#endif
+
 #include "NativeDB.h"
 #include "sqlite3.h"
 
