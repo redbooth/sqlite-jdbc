@@ -28,7 +28,7 @@ public class ExtendedCommand
 
     /**
      * Parses extended commands of "backup" or "restore" for SQLite database.  
-     * @param sql One of the extended commands:<br/>
+     * @param sql One of the extended commands:
      *      backup sourceDatabaseName to destinationFileName OR restore targetDatabaseName from sourceFileName
      * @return BackupCommand object if the argument is a backup command; RestoreCommand object if
      *         the argument is a restore command;
