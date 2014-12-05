@@ -20,15 +20,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -718,6 +710,14 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      */
     public Timestamp getTimestamp(String c, Calendar ca) throws SQLException {
         return getTimestamp(findColumn(c), ca);
+    }
+
+    public int getHoldability() throws SQLException {
+        return 0;
+    }
+
+    public boolean isClosed() throws SQLException {
+        return !isOpen();
     }
 
     /**

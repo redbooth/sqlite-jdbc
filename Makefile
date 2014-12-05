@@ -32,7 +32,7 @@ $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
 
 $(SQLITE_OUT)/org/sqlite/%.class: src/main/java/org/sqlite/%.java
 	@mkdir -p $(@D)
-	$(JAVAC) -source 1.5 -target 1.5 -sourcepath $(SRC) -d $(SQLITE_OUT) $<
+	$(JAVAC) -source 1.8 -target 1.8 -sourcepath $(SRC) -d $(SQLITE_OUT) $<
 
 jni-header: $(SRC)/org/sqlite/NativeDB.h
 

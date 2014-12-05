@@ -16,14 +16,7 @@
 
 package org.sqlite;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Struct;
-import java.sql.Types;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1070,6 +1063,30 @@ class MetaData implements DatabaseMetaData
         return false;
     }
 
+    public RowIdLifetime getRowIdLifetime() throws SQLException {
+        return RowIdLifetime.ROWID_UNSUPPORTED;
+    }
+
+    public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
+        return null;
+    }
+
+    public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
+        return false;
+    }
+
+    public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
+        return false;
+    }
+
+    public ResultSet getClientInfoProperties() throws SQLException {
+        return null;
+    }
+
+    public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
+        return null;
+    }
+
     /**
      * @see java.sql.DatabaseMetaData#supportsStoredProcedures()
      */
@@ -1905,6 +1922,14 @@ class MetaData implements DatabaseMetaData
         throw new SQLException("Not yet implemented by SQLite JDBC driver");
     }
 
+    public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
+        return null;
+    }
+
+    public boolean generatedKeyAlwaysReturned() throws SQLException {
+        return false;
+    }
+
     // inner classes
 
     /**
@@ -1918,6 +1943,14 @@ class MetaData implements DatabaseMetaData
      */
      protected final static Pattern PK_NAMED_PATTERN =
          Pattern.compile(".* constraint +(.*?) +primary +key *\\((.*?)\\).*", Pattern.CASE_INSENSITIVE);
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new SQLException("unsupported");
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return false;
+    }
 
     /**
      * Parses the sqlite_master table for a table's primary key
