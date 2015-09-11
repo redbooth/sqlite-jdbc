@@ -23,7 +23,7 @@ CFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_AMAL_DIR) $(CFLAGS)
 
 $(SQLITE_ARCHIVE):
 	@mkdir -p $(@D)
-	curl -o$@ http://www.sqlite.org/2014/$(SQLITE_AMAL_PREFIX).zip
+	curl -o$@ http://www.sqlite.org/2015/$(SQLITE_AMAL_PREFIX).zip
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
 	unzip -qo $< -d $(TARGET)
@@ -48,8 +48,8 @@ clean: clean-native clean-java clean-tests
 $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	@mkdir -p $(@D)
 	$(CC) -o $@ -c $(CFLAGS) \
-	    -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
 	    -DSQLITE_ENABLE_COLUMN_METADATA \
+	    -DSQLITE_THREADSAFE=2 \
 	    -DSQLITE_CORE \
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_AMAL_DIR)/sqlite3.c

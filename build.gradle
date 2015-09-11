@@ -4,7 +4,15 @@ apply plugin: 'maven-publish'
 
 group = 'com.aerofs'
 archivesBaseName = 'sqlite-jdbc'
-version = '3.8.7'
+version = '3.8.11.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.11'
+}
 
 javadoc {
     options.links 'http://docs.oracle.com/javase/6/docs/api/'
