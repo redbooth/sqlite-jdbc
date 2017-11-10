@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 
 group = 'com.aerofs'
 archivesBaseName = 'sqlite-jdbc'
-version = '3.12.0'
+version = '3.21.0'
 
 repositories {
     mavenCentral()

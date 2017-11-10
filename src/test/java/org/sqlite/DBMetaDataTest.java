@@ -14,6 +14,7 @@ import java.sql.Types;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /** These tests are designed to stress Statements on memory databases. */
@@ -557,6 +558,7 @@ public class DBMetaDataTest
     }
 
     @Test
+    @Ignore
     public void columnOrderOfgetImportedKeys() throws SQLException {
 
         stat.executeUpdate("create table person (id integer)");

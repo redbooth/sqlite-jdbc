@@ -17,15 +17,17 @@ SQLITE_OUT:=$(TARGET)/$(sqlite)-$(OS_NAME)-$(OS_ARCH)
 SQLITE_ARCHIVE:=$(TARGET)/$(sqlite)-amal.zip
 SQLITE_UNPACKED:=$(TARGET)/sqlite-unpack.log
 SQLITE_AMAL_DIR=$(TARGET)/$(SQLITE_AMAL_PREFIX)
+SQLITE_ARCHIVE_SHA1:=ebe33c20d37a715db95288010c1009cd560f2452
 
 
 CFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_AMAL_DIR) $(CFLAGS)
 
 $(SQLITE_ARCHIVE):
 	@mkdir -p $(@D)
-	curl -o$@ http://www.sqlite.org/2016/$(SQLITE_AMAL_PREFIX).zip
+	curl -o$@ http://www.sqlite.org/2017/$(SQLITE_AMAL_PREFIX).zip
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
+	[[ "$(SQLITE_ARCHIVE_SHA1)" == $$(sha1sum $< | cut -d' ' -f1) ]] || exit 1
 	unzip -qo $< -d $(TARGET)
 	touch $@
 
@@ -50,6 +52,9 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	$(CC) -o $@ -c $(CFLAGS) \
 	    -DSQLITE_ENABLE_COLUMN_METADATA \
 	    -DSQLITE_THREADSAFE=2 \
+	    -DSQLITE_DEFAULT_MEMSTATUS=0 \
+	    -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 \
+	    -DHAVE_USLEEP \
 	    -DSQLITE_CORE \
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_AMAL_DIR)/sqlite3.c
