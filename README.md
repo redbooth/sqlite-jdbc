@@ -19,11 +19,16 @@ Forked in 2013 from [sqlite-jdbc](https://bitbucket.org/xerial/sqlite-jdbc) for 
 gradle assemble
 ```
 
+JARs are placed under `build/libs/`
+
+
 ## Build native code
 
 ```
 make native
 ```
+
+Native libs are placed under `target/lib/<OS>/<ARCH>/`
 
 *NB* this must be done on each supported platform separately
 
